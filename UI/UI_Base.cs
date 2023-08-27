@@ -60,6 +60,7 @@ public class UI_Base : MonoBehaviour
     #region 오브젝트 찾기
     public Button GetButton(int idx) { return Get<Button>(idx); }
     public TextMeshProUGUI GetText(int idx) { return Get<TextMeshProUGUI>(idx); }
+    public Image GetImage(int idx) { return Get<Image>(idx); }
 
     T Get<T>(int idx) where T : Object
     {

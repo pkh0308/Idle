@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class UI_EnhancePopUp : UI_PopUp
+public class UI_TreasurePopUp : UI_PopUp
 {
     enum Texts
     {
@@ -43,23 +43,23 @@ public class UI_EnhancePopUp : UI_PopUp
     #region 버튼
     public void Btn_OnClickAtkPower()
     {
-        Debug.Log("공격력 증가");
+        Debug.Log("싸움꾼의 장갑 구매");
     }
     public void Btn_OnClickAtkSpeed()
     {
-        Debug.Log("공격속도 증가");
+        Debug.Log("신속의 깃털 구매");
     }
     public void Btn_OnClickCritChance()
     {
-        Debug.Log("치명타 확률 증가");
+        Debug.Log("행운의 반지 구매");
     }
     public void Btn_OnClickCritDamage()
     {
-        Debug.Log("치명타 데미지 증가");
+        Debug.Log("바이킹의 투구 구매");
     }
     public void Btn_OnClickGoldUp()
     {
-        Debug.Log("획득 골드 증가");
+        Debug.Log("부자의 왕관 구매");
     }
     #endregion
 }

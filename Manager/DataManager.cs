@@ -72,5 +72,10 @@ public class DataManager
         GameData gameData = new GameData(0, 0, 0, 0, 0);
         CurGameData = gameData;
     }
+
+    public void SetGameData(GameData data)
+    {
+        CurGameData = data;
+    }
     #endregion
 }
