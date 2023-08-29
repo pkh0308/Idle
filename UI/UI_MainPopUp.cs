@@ -6,8 +6,10 @@ using UnityEngine.UI;
 
 public class UI_MainPopUp : UI_PopUp
 {
+    #region 변수 및 열거형
     enum Texts
     {
+        NickNameText,
         StageText,
         EnhanceBtnText,
         WeaponBtnText,
@@ -16,8 +18,11 @@ public class UI_MainPopUp : UI_PopUp
         GoldText,
         GemText
     }
+    TextMeshProUGUI _nicknameText;
+    TextMeshProUGUI _stageText;
     TextMeshProUGUI _goldText;
     TextMeshProUGUI _gemText;
+    const string STAGE = "Stage ";
 
     enum Buttons
     {
@@ -32,6 +37,8 @@ public class UI_MainPopUp : UI_PopUp
         Field02,
         Enemy01,
         Enemy02,
+        HpBarBg,
+        HpBar,
         Player,
         EnhanceBtn,
         WeaponBtn,
@@ -44,6 +51,8 @@ public class UI_MainPopUp : UI_PopUp
     Image _back;
     Image _frontEnemy;
     Image _backEnemy;
+    Image _hpBar;
+    Image _hpBarBg;
     bool _onCombat = false;
     const int FieldMax = 1440;
 
@@ -62,7 +71,9 @@ public class UI_MainPopUp : UI_PopUp
         Shop
     }
     State curState;
+    #endregion
 
+    #region 초기화
     public override bool Init()
     {
         BindText(typeof(Texts));
@@ -74,22 +85,44 @@ public class UI_MainPopUp : UI_PopUp
         Custom.GetOrAddComponent<UI_Base>(GetButton((int)Buttons.TreasureBtn).gameObject).BindEvent(Btn_OnClickTreasure);
         Custom.GetOrAddComponent<UI_Base>(GetButton((int)Buttons.ShopBtn).gameObject).BindEvent(Btn_OnClickShop);
 
+        _nicknameText = GetText((int)Texts.NickNameText);
+        _nicknameText.text = Managers.Game.NickName;
+        _stageText = GetText((int)Texts.StageText);
         _goldText = GetText((int)Texts.GoldText);
+        _goldText.text = Managers.Game.CurGold.ToString();
         _gemText = GetText((int)Texts.GemText);
+        _gemText.text = Managers.Game.CurGold.ToString();
+
         _front = GetImage((int)Images.Field01);
         _back = GetImage((int)Images.Field02);
         _frontEnemy = GetImage((int)Images.Enemy01);
         _backEnemy = GetImage((int)Images.Enemy02);
+        _hpBar = GetImage((int)Images.HpBar);
+        _hpBarBg = GetImage((int)Images.HpBarBg);
         _playerAnimator = GetImage((int)Images.Player).gameObject.GetComponent<Animator>();
 
         Managers.UI.OpenPopUp<UI_EnhancePopUp>(typeof(UI_EnhancePopUp).Name, transform);
         curState = State.Enhance;
 
+        // UI 초기화
+        UpdateGoldGem();
+        UpdateStageText();
+        InitialSetActiveFalse();
+        // 이동 & 전투 초기화
+        Managers.Game.InitStage();
         StartCoroutine(Idle());
         StartCoroutine(Combat());
-        GoldGemUpdate();
+        SpawnEnemy();
         return true;
     }
+
+    // 초기에 비활성화할 오브젝트들
+    void InitialSetActiveFalse()
+    { 
+        _hpBarBg.gameObject.SetActive(false);
+        _frontEnemy.gameObject.SetActive(false);
+    }
+    #endregion
 
     #region 버튼
     public void Btn_OnClickEnhance()
@@ -146,20 +179,42 @@ public class UI_MainPopUp : UI_PopUp
     {
         if (_back.rectTransform.anchoredPosition.x == 0)
         {
-            // 필드 순서 이동
-            _front.rectTransform.anchoredPosition = Vector2.right * FieldMax;
-            Image temp = _front;
-            _front = _back;
-            _back = temp;
+            // 필드 순서 반전 및 몹 설정
+            ReverseField();
+            SpawnEnemy();
 
             // 전투 진입
             _onCombat = true;
             _playerAnimator.SetBool(AnimVar.OnCombat.ToString(), true);
+            _hpBarBg.gameObject.SetActive(true);
+            _hpBar.rectTransform.localScale = Vector2.one;
             return;
         }
 
         _front.rectTransform.anchoredPosition += Vector2.left * 5;
         _back.rectTransform.anchoredPosition += Vector2.left * 5;
+    }
+
+    void ReverseField()
+    {
+        _front.rectTransform.anchoredPosition = Vector2.right * FieldMax;
+        Image temp = _front;
+        _front = _back;
+        _back = temp;
+
+        temp = _frontEnemy;
+        _frontEnemy = _backEnemy;
+        _backEnemy = temp;
+        _backEnemy.gameObject.SetActive(true);
+    }
+
+    void SpawnEnemy()
+    {
+        // ToDo: _backEnemy를 랜덤 몹 스프라이트로 갱신
+        //Managers.Resc.Load<Sprite>("", (op) =>
+        //{
+        //    _backEnemy.sprite = op;
+        //});
     }
 
     IEnumerator Combat()
@@ -173,32 +228,44 @@ public class UI_MainPopUp : UI_PopUp
             }
 
             Attack();
+            // ToDo: 공격속도 반영하도록 수정
             yield return new WaitForSeconds(1.0f);
         }
     }
 
-    int _hp = 5;
+    Vector2 hpVec = Vector2.one;
     void Attack()
     {
         _playerAnimator.SetTrigger(AnimVar.DoAttack.ToString());
-        _hp--;
-        if(_hp == 0)
+        Managers.Game.Attack();
+
+        // 체력바 갱신
+        float hpRate = (float)Managers.Game.EnemyHp / Managers.Game.MaxEnemyHp;
+        if(hpRate <= 0)
         {
-            _onCombat = false;
-            _playerAnimator.SetBool(AnimVar.OnCombat.ToString(), false);
-            _hp = 5;
+            OnEnemyDie();
+            return;
         }
+
+        hpVec.x = hpRate;
+        _hpBar.rectTransform.localScale = hpVec;
     }
 
-    void SpawnEnemy()
+    void OnEnemyDie()
     {
-        // ToDo: _backEnemy를 랜덤 몹 스프라이트로 갱신
-        // 체력 UI 갱신
+        _onCombat = false;
+        _playerAnimator.SetBool(AnimVar.OnCombat.ToString(), false);
+        _frontEnemy.gameObject.SetActive(false);
+        _hpBarBg.gameObject.SetActive(false);
+
+        if(Managers.Game.OnEnemyDie())
+            UpdateStageText();
+        UpdateGoldGem();
     }
     #endregion
 
     #region UI 갱신
-    void GoldGemUpdate()
+    void UpdateGoldGem()
     {
         _goldText.text = CalUnit(Managers.Game.CurGold);
         _gemText.text = CalUnit(Managers.Game.CurGem);
@@ -215,6 +282,20 @@ public class UI_MainPopUp : UI_PopUp
         }
 
         return value + units[count];
+    }
+
+    void UpdateStageText()
+    {
+        int floor = 1,  stage = 1;
+        int stageIdx = Managers.Game.CurStageIdx;
+
+        while(stageIdx > 100)
+        {
+            stageIdx /= 100;
+            floor++;
+        }
+        stage += stageIdx;
+        _stageText.text = STAGE + floor + " - " + stage;
     }
     #endregion
 }

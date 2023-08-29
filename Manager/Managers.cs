@@ -29,6 +29,8 @@ public class Managers : MonoBehaviour
 
     void OnApplicationQuit()
     {
+        // GameData 갱신 후 저장
+        gameManager.UpdateGameData();
         dataManager.SaveGameData();
     }
 }

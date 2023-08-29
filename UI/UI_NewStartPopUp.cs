@@ -49,8 +49,7 @@ public class UI_NewStartPopUp : UI_PopUp
             return;
         }
 
-        // ToDo: 입력된 닉네임으로 신규 게임 시작
-        Managers.Game.StartNewGame();
+        Managers.Game.StartNewGame(idText.text);
     }
 
     public void Btn_OnClickExit()
