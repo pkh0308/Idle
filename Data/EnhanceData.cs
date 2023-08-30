@@ -1,7 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
+// 강화 데이터 저장용
 public class EnhanceData
 {
     public readonly int AtkPowCost;
@@ -9,14 +6,14 @@ public class EnhanceData
     public readonly int CritChanceCost;
     public readonly int CritDmgCost;
     public readonly int GoldUpCost;
-    int[] costArr = new int[ConstValue.NumOfEnhance];
+    int[] costArr = new int[ConstValue.NumOfEnhances];
 
     public readonly int AtkPowValue;
     public readonly int AtkSpdValue;
     public readonly int CritChanceValue;
     public readonly int CritDmgValue;
     public readonly int GoldUpValue;
-    int[] valueArr = new int[ConstValue.NumOfEnhance];
+    int[] valueArr = new int[ConstValue.NumOfEnhances];
 
     public EnhanceData(int AtkPowCost, int AtkSpdCost, int CritChanceCost, int CritDmgCost, int GoldUpCost,
                        int AtkPowValue, int AtkSpdValue, int CritChanceValue, int CritDmgValue, int GoldUpValue)
@@ -38,17 +35,17 @@ public class EnhanceData
 
     void BindData()
     {
-        costArr[0] = AtkPowCost;
-        costArr[1] = AtkSpdCost;
-        costArr[2] = CritChanceCost;
-        costArr[3] = CritDmgCost;
-        costArr[4] = GoldUpCost;
+        costArr[(int)ConstValue.Enhances.AtkPow] = AtkPowCost;
+        costArr[(int)ConstValue.Enhances.AtkSpd] = AtkSpdCost;
+        costArr[(int)ConstValue.Enhances.CritChance] = CritChanceCost;
+        costArr[(int)ConstValue.Enhances.CritDmg] = CritDmgCost;
+        costArr[(int)ConstValue.Enhances.GoldUp] = GoldUpCost;
 
-        valueArr[0] = AtkPowValue;
-        valueArr[1] = AtkSpdValue;
-        valueArr[2] = CritChanceValue;
-        valueArr[3] = CritDmgValue;
-        valueArr[4] = GoldUpValue;
+        valueArr[(int)ConstValue.Enhances.AtkPow] = AtkPowValue;
+        valueArr[(int)ConstValue.Enhances.AtkSpd] = AtkSpdValue;
+        valueArr[(int)ConstValue.Enhances.CritChance] = CritChanceValue;
+        valueArr[(int)ConstValue.Enhances.CritDmg] = CritDmgValue;
+        valueArr[(int)ConstValue.Enhances.GoldUp] = GoldUpValue;
     }
 
     public int GetCost(int idx)

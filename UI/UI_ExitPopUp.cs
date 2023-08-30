@@ -30,7 +30,9 @@ public class UI_ExitPopUp : UI_PopUp
     #region 버튼 콜백
     public void Btn_OnClickExitOk()
     {
-    #if UNITY_EDITOR
+        Managers.Sound.PlaySfx(SoundManager.Sfxs.Sound_BtnClick);
+
+#if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
     #else
         Application.Quit();
@@ -39,6 +41,7 @@ public class UI_ExitPopUp : UI_PopUp
 
     public void Btn_OnClickExitCancle()
     {
+        Managers.Sound.PlaySfx(SoundManager.Sfxs.Sound_BtnClick);
         Managers.UI.ClosePopUp(this);
     }
     #endregion

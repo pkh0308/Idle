@@ -38,71 +38,94 @@ public class UI_EnhancePopUp : UI_PopUp
         BindText(typeof(Texts));
         BindButton(typeof(Buttons));
 
+        _atkPowerBtnText = GetText((int)Texts.AtkPowerBtnText);
+        _atkSpeedBtnText = GetText((int)Texts.AtkSpeedBtnText);
+        _critChanceBtnText = GetText((int)Texts.CritChanceBtnText);
+        _critDamageBtnText = GetText((int)Texts.CritDamageBtnText);
+        _goldUpBtnText = GetText((int)Texts.GoldUpBtnText);
+
         Custom.GetOrAddComponent<UI_Base>(GetButton((int)Buttons.AtkPowerBtn).gameObject).BindEvent(Btn_OnClickAtkPower);
         Custom.GetOrAddComponent<UI_Base>(GetButton((int)Buttons.AtkSpeedBtn).gameObject).BindEvent(Btn_OnClickAtkSpeed);
         Custom.GetOrAddComponent<UI_Base>(GetButton((int)Buttons.CritChanceBtn).gameObject).BindEvent(Btn_OnClickCritChance);
         Custom.GetOrAddComponent<UI_Base>(GetButton((int)Buttons.CritDamageBtn).gameObject).BindEvent(Btn_OnClickCritDamage);
         Custom.GetOrAddComponent<UI_Base>(GetButton((int)Buttons.GoldUpBtn).gameObject).BindEvent(Btn_OnClickGoldUp);
 
+        UpdateBtns();
         return true;
     }
 
     #region 버튼
     public void Btn_OnClickAtkPower()
     {
-        Debug.Log("공격력 증가");
-
         if(Managers.Game.EnhanceAtkPow() == false)
+        {
             Managers.UI.OpenNotice(ConstValue.Notice_NotEnoughMoney, transform);
+            return;
+        }
 
-        UpdateEnhanceBtns();
+        Managers.Sound.PlaySfx(SoundManager.Sfxs.Sound_Upgrade);
+        UpdateBtns();
     }
     public void Btn_OnClickAtkSpeed()
     {
-        Debug.Log("공격속도 증가");
-
         if (Managers.Game.EnhanceAtkSpd() == false)
+        {
             Managers.UI.OpenNotice(ConstValue.Notice_NotEnoughMoney, transform);
+            return;
+        }
 
-        UpdateEnhanceBtns();
+        Managers.Sound.PlaySfx(SoundManager.Sfxs.Sound_Upgrade);
+        UpdateBtns();
     }
     public void Btn_OnClickCritChance()
     {
-        Debug.Log("치명타 확률 증가");
-
         if (Managers.Game.EnhanceCritChance() == false)
+        {
             Managers.UI.OpenNotice(ConstValue.Notice_NotEnoughMoney, transform);
+            return;
+        }
 
-        UpdateEnhanceBtns();
+        Managers.Sound.PlaySfx(SoundManager.Sfxs.Sound_Upgrade);
+        UpdateBtns();
     }
     public void Btn_OnClickCritDamage()
     {
-        Debug.Log("치명타 데미지 증가");
-
         if (Managers.Game.EnhanceCritDamage() == false)
+        {
             Managers.UI.OpenNotice(ConstValue.Notice_NotEnoughMoney, transform);
+            return;
+        }
 
-        UpdateEnhanceBtns();
+        Managers.Sound.PlaySfx(SoundManager.Sfxs.Sound_Upgrade);
+        UpdateBtns();
     }
     public void Btn_OnClickGoldUp()
     {
-        Debug.Log("획득 골드 증가");
-
         if (Managers.Game.EnhanceGoldUp() == false)
+        {
             Managers.UI.OpenNotice(ConstValue.Notice_NotEnoughMoney, transform);
+            return;
+        }
 
-        UpdateEnhanceBtns();
+        Managers.Sound.PlaySfx(SoundManager.Sfxs.Sound_Upgrade);
+        UpdateBtns();
     }
     #endregion
 
     #region UI 업데이트
-    void UpdateEnhanceBtns()
+    void UpdateBtns()
     {
-        _atkPowerBtnText.text = Managers.Data.GetEnahnceCost(0, Managers.Game.AtkPowerLv).ToString();
-        _atkSpeedBtnText.text = Managers.Data.GetEnahnceCost(0, Managers.Game.AtkSpeedLv).ToString();
-        _critChanceBtnText.text = Managers.Data.GetEnahnceCost(0, Managers.Game.CritChanceLv).ToString();
-        _critDamageBtnText.text = Managers.Data.GetEnahnceCost(0, Managers.Game.CritDamageLv).ToString();
-        _goldUpBtnText.text = Managers.Data.GetEnahnceCost(0, Managers.Game.GoldUpLv).ToString();
+        int atkPow = (int)Buttons.AtkPowerBtn;
+        int atkSpd = (int)Buttons.AtkSpeedBtn;
+        int critChance = (int)Buttons.CritChanceBtn;
+        int critDmg = (int)Buttons.CritDamageBtn;
+        int goldUp = (int)Buttons.GoldUpBtn;
+
+        _atkPowerBtnText.text = Custom.CalUnit(Managers.Data.GetEnahnceCost(atkPow, Managers.Game.AtkPowerLv));
+        _atkSpeedBtnText.text = Custom.CalUnit(Managers.Data.GetEnahnceCost(atkSpd, Managers.Game.AtkPowerLv));
+        _critChanceBtnText.text = Custom.CalUnit(Managers.Data.GetEnahnceCost(critChance, Managers.Game.AtkPowerLv));
+        _critDamageBtnText.text = Custom.CalUnit(Managers.Data.GetEnahnceCost(critDmg, Managers.Game.AtkPowerLv));
+        _goldUpBtnText.text = Custom.CalUnit(Managers.Data.GetEnahnceCost(goldUp, Managers.Game.AtkPowerLv));
     }
     #endregion
 }

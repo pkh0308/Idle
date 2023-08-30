@@ -1,6 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
 using Object = UnityEngine.Object;
@@ -28,5 +25,20 @@ public class Custom
         }
 
         return null;
+    }
+
+    public static string CalUnit(int value)
+    {
+        if (value < 0)
+            return ConstValue.Max;
+
+        string[] units = { "", "A", "B", "C", "D", "E", "F" };
+        int count = 0;
+        while (value > 1000)
+        {
+            value /= 1000;
+            count++;
+        }
+        return value + units[count];
     }
 }

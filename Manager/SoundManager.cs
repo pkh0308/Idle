@@ -13,11 +13,14 @@ public class SoundManager
     }
     public enum Bgms
     {
-
+        Sound_Title,
+        Sound_Main
     }
     public enum Sfxs
     {
-
+        Sound_Upgrade,
+        Sound_BtnClick,
+        Sound_Attack
     }
     public enum Voices
     {

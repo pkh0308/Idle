@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -113,6 +112,8 @@ public class UI_MainPopUp : UI_PopUp
         StartCoroutine(Idle());
         StartCoroutine(Combat());
         SpawnEnemy();
+        // Bgm
+        Managers.Sound.PlayBgm(SoundManager.Bgms.Sound_Main);
         return true;
     }
 
@@ -237,6 +238,7 @@ public class UI_MainPopUp : UI_PopUp
     void Attack()
     {
         _playerAnimator.SetTrigger(AnimVar.DoAttack.ToString());
+        Managers.Sound.PlaySfx(SoundManager.Sfxs.Sound_Attack, 2.0f);
         Managers.Game.Attack();
 
         // 체력바 갱신
@@ -267,21 +269,8 @@ public class UI_MainPopUp : UI_PopUp
     #region UI 갱신
     void UpdateGoldGem()
     {
-        _goldText.text = CalUnit(Managers.Game.CurGold);
-        _gemText.text = CalUnit(Managers.Game.CurGem);
-    }
-
-    string CalUnit(int value)
-    {
-        string[] units = { "", "A", "B", "C", "D", "E", "F" };
-        int count = 0;
-        while(value > 1000)
-        {
-            value /= 1000;
-            count++;
-        }
-
-        return value + units[count];
+        _goldText.text = Custom.CalUnit(Managers.Game.CurGold);
+        _gemText.text = Custom.CalUnit(Managers.Game.CurGem);
     }
 
     void UpdateStageText()

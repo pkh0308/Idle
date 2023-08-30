@@ -96,7 +96,7 @@ public class GameData
         strValues[(int)ConstValue.GameDataVal.Treasure_CritDmgLv] = Treasure_CritDmgLv.ToString();
         strValues[(int)ConstValue.GameDataVal.Treasure_GoldUpLv] = Treasure_GoldUpLv.ToString();
         // 유저 데이터
-        strValues[(int)ConstValue.GameDataVal.NickName] = NickName.ToString();
+        strValues[(int)ConstValue.GameDataVal.NickName] = NickName;
         strValues[(int)ConstValue.GameDataVal.CurGold] = CurGold.ToString();
         strValues[(int)ConstValue.GameDataVal.CurGem] = CurGem.ToString();
         strValues[(int)ConstValue.GameDataVal.StageIdx] = StageIdx.ToString();

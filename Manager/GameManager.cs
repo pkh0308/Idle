@@ -1,7 +1,5 @@
-using Newtonsoft.Json.Linq;
 using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -71,6 +69,9 @@ public class GameManager
 
     public void UpdateGameData()
     {
+        if (curState == GameState.Title)
+            return;
+
         GameData data = new GameData(AtkPowerLv, AtkSpeedLv, CritChanceLv, CritDamageLv, GoldUpLv, WeaponLv,
                                      Tr_atkPowerLv, Tr_atkSpeedLv, Tr_critChanceLv, Tr_critDamageLv, Tr_goldUpLv,
                                      NickName, CurGold, CurGem, CurStageIdx);
@@ -104,27 +105,21 @@ public class GameManager
     #endregion
 
     #region 재화 획득 & 소모
-    public enum Goods
-    {
-        Gold,
-        Gem
-    }
-
-    public bool Purchase(Goods type, int value)
+    public bool Purchase(ConstValue.Goods type, int value)
     {
         int temp = 0;
-        if(type == Goods.Gold)
+        if(type == ConstValue.Goods.Gold)
             temp = CurGold;
-        else if(type == Goods.Gem)
+        else if(type == ConstValue.Goods.Gem)
             temp = CurGem;
 
         temp -= value;
         if (temp < 0)
             return false;
 
-        if (type == Goods.Gold)
+        if (type == ConstValue.Goods.Gold)
             CurGold = temp;
-        else if (type == Goods.Gem)
+        else if (type == ConstValue.Goods.Gem)
             CurGem = temp;
 
         return true;
@@ -207,10 +202,11 @@ public class GameManager
             return false;
         }
 
-        if (Purchase(Goods.Gold, cost) == false)
+        if (Purchase(ConstValue.Goods.Gold, cost) == false)
             return false;
 
         // 해당하는 강화 레벨 증가
+
         return true;
     }
 
@@ -219,5 +215,41 @@ public class GameManager
     public bool EnhanceCritChance() { return Enhance((int)ConstValue.Enhances.CritChance, CritChanceLv); }
     public bool EnhanceCritDamage() { return Enhance((int)ConstValue.Enhances.CritDmg, CritDamageLv); }
     public bool EnhanceGoldUp() { return Enhance((int)ConstValue.Enhances.GoldUp, GoldUpLv); }
+    #endregion
+
+    #region 무기
+    public bool BuyWeapon()
+    {
+        WeaponData wData = Managers.Data.GetWeaponData(WeaponLv);
+        if (wData == null)
+        {
+            Debug.Log($"Wrong weaponLv to buy: {WeaponLv}");
+            return false;
+        }
+
+        if (Purchase(ConstValue.Goods.Gold, wData.Cost) == false)
+            return false;
+
+        WeaponLv++;
+        return true;
+    }
+    #endregion
+
+    #region 보물
+    public bool BuyTreasure()
+    {
+
+
+        return true;
+    }
+    #endregion
+
+    #region 상점
+    public bool BuyShopGoods()
+    {
+
+
+        return true;
+    }
     #endregion
 }

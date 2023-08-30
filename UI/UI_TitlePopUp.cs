@@ -25,22 +25,26 @@ public class UI_TitlePopUp : UI_PopUp
         Custom.GetOrAddComponent<UI_Base>(GetButton((int)Buttons.LoadBtn).gameObject).BindEvent(Btn_OnClickLoad);
         Custom.GetOrAddComponent<UI_Base>(GetButton((int)Buttons.ExitBtn).gameObject).BindEvent(Btn_OnClickExit);
 
+        Managers.Sound.PlayBgm(SoundManager.Bgms.Sound_Title);
         return true;
     }
     #region ¹öÆ°
     public void Btn_OnClickStart()
     {
+        Managers.Sound.PlaySfx(SoundManager.Sfxs.Sound_BtnClick);
         Managers.UI.OpenPopUp<UI_NewStartPopUp>(typeof(UI_NewStartPopUp).Name, transform);
     }
 
     public void Btn_OnClickLoad()
     {
-        if(Managers.Game.LoadGame() == false)
+        Managers.Sound.PlaySfx(SoundManager.Sfxs.Sound_BtnClick);
+        if (Managers.Game.LoadGame() == false)
             Managers.UI.OpenNotice(ConstValue.Notice_NoSaveData, transform);
     }
 
     public void Btn_OnClickExit()
     {
+        Managers.Sound.PlaySfx(SoundManager.Sfxs.Sound_BtnClick);
         Managers.UI.OpenPopUp<UI_ExitPopUp>(typeof(UI_ExitPopUp).Name, transform);
     }
     #endregion

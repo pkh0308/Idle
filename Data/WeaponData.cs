@@ -1,18 +1,16 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-public class WeaponData : MonoBehaviour
+// 무기 데이터 저장용
+public class WeaponData 
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    public readonly int AtkPower;
+    public readonly int CritChance;
+    public readonly int CritDamage;
+    public readonly int Cost;
 
-    // Update is called once per frame
-    void Update()
+    public WeaponData(int AtkPower, int CritChance, int CritDamage, int Cost)
     {
-        
+        this.AtkPower = AtkPower;
+        this.CritChance = CritChance;
+        this.CritDamage = CritDamage;
+        this.Cost = Cost;
     }
 }

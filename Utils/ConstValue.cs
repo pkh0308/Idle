@@ -3,6 +3,7 @@ using UnityEngine;
 public class ConstValue
 {
     public const string EventSystem = "EventSystem";
+    public const string Max = "Max";
 
     // notice
     public const string Notice_LessThan2 = "닉네임은 2자 이상이어야 합니다.";
@@ -10,7 +11,8 @@ public class ConstValue
     public const string Notice_NoSaveData = "저장된 데이터가 없습니다.";
     public const string Notice_NotEnoughMoney = "재화가 부족합니다.";
 
-    public const int NumOfEnhance = 5;
+    public const int NumOfEnhances = 5;
+    public const int NumOfTreasures = 5;
 
     #region 열거형
     public enum GameDataVal
@@ -31,7 +33,6 @@ public class ConstValue
         CurGem,
         StageIdx
     }
-
     public enum StageDataVal
     {
         Hp,
@@ -41,7 +42,6 @@ public class ConstValue
         DropGold,
         DropGem
     }
-
     public enum EnhanceDataVal
     {
         AtkPowCost,
@@ -55,6 +55,33 @@ public class ConstValue
         CritDmgValue,
         GoldUpValue
     }
+    public enum WeaponDataVal
+    {
+        AtkPower,
+        CritChance,
+        CritDamage,
+        Cost
+    }
+    public enum TreasureDataVal
+    {
+        Tr_AtkPowCost,
+        Tr_AtkSpdCost,
+        Tr_CritChanceCost,
+        Tr_CritDmgCost,
+        Tr_GoldUpCost,
+        Tr_AtkPowValue,
+        Tr_AtkSpdValue,
+        Tr_CritChanceValue,
+        Tr_CritDmgValue,
+        Tr_GoldUpValue
+    }
+    public enum ShopDataVal
+    {
+        Name,
+        MaxCount,
+        GoodsType,
+        GoodsValue
+    }
 
     public enum Enhances
     {
@@ -63,6 +90,21 @@ public class ConstValue
         CritChance,
         CritDmg,
         GoldUp
+    }
+    public enum Treasures
+    {
+        Tr_AtkPow,
+        Tr_AtkSpd,
+        Tr_CritChance,
+        Tr_CritDmg,
+        Tr_GoldUp
+    }
+
+
+    public enum Goods
+    {
+        Gold,
+        Gem
     }
     #endregion
 }

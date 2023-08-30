@@ -1,18 +1,17 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-public class ShopData : MonoBehaviour
+// 상점 상품 데이터 저장용
+// MaxCount가 -1이라면 광고 시청 상품
+public class ShopData
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    public readonly string Name;
+    public readonly int MaxCount;
+    public readonly int GoodsType;
+    public readonly int GoodsValue;
 
-    // Update is called once per frame
-    void Update()
+    public ShopData(string Name, int MaxCount, int GoodsType, int GoodsValue)
     {
-        
+        this.Name = Name;
+        this.MaxCount = MaxCount;
+        this.GoodsType = GoodsType;
+        this.GoodsValue = GoodsValue;
     }
 }
