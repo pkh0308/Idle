@@ -53,7 +53,9 @@ public class UI_MainPopUp : UI_PopUp
     Image _hpBar;
     Image _hpBarBg;
     bool _onCombat = false;
+
     const int FieldMax = 1440;
+    const int MoveSpeed = 3;
 
     enum AnimVar
     {
@@ -100,7 +102,7 @@ public class UI_MainPopUp : UI_PopUp
         _hpBarBg = GetImage((int)Images.HpBarBg);
         _playerAnimator = GetImage((int)Images.Player).gameObject.GetComponent<Animator>();
 
-        Managers.UI.OpenPopUp<UI_EnhancePopUp>(typeof(UI_EnhancePopUp).Name, transform);
+        Managers.UI.OpenPopUp<UI_EnhancePopUp>(typeof(UI_EnhancePopUp).Name, transform, false);
         curState = State.Enhance;
 
         // UI 초기화
@@ -131,7 +133,7 @@ public class UI_MainPopUp : UI_PopUp
         if (curState == State.Enhance)
             return;
 
-        Managers.UI.OpenPopUp<UI_EnhancePopUp>(typeof(UI_EnhancePopUp).Name, transform);
+        Managers.UI.OpenPopUp<UI_EnhancePopUp>(typeof(UI_EnhancePopUp).Name, transform, false);
         curState = State.Enhance;
     }
     public void Btn_OnClickWeapon()
@@ -139,7 +141,7 @@ public class UI_MainPopUp : UI_PopUp
         if (curState == State.Weapon)
             return;
 
-        Managers.UI.OpenPopUp<UI_WeaponPopUp>(typeof(UI_WeaponPopUp).Name, transform);
+        Managers.UI.OpenPopUp<UI_WeaponPopUp>(typeof(UI_WeaponPopUp).Name, transform, false);
         curState = State.Weapon;
     }
     public void Btn_OnClickTreasure()
@@ -147,7 +149,7 @@ public class UI_MainPopUp : UI_PopUp
         if (curState == State.Treasure)
             return;
 
-        Managers.UI.OpenPopUp<UI_TreasurePopUp>(typeof(UI_TreasurePopUp).Name, transform);
+        Managers.UI.OpenPopUp<UI_TreasurePopUp>(typeof(UI_TreasurePopUp).Name, transform, false);
         curState = State.Treasure;
     }
     public void Btn_OnClickShop()
@@ -155,7 +157,7 @@ public class UI_MainPopUp : UI_PopUp
         if (curState == State.Shop)
             return;
 
-        Managers.UI.OpenPopUp<UI_ShopPopUp>(typeof(UI_ShopPopUp).Name, transform);
+        Managers.UI.OpenPopUp<UI_ShopPopUp>(typeof(UI_ShopPopUp).Name, transform, false);
         curState = State.Shop;
     }
     #endregion
@@ -178,7 +180,7 @@ public class UI_MainPopUp : UI_PopUp
 
     void Move()
     {
-        if (_back.rectTransform.anchoredPosition.x == 0)
+        if (_back.rectTransform.anchoredPosition.x <= 0)
         {
             // 필드 순서 반전 및 몹 설정
             ReverseField();
@@ -192,13 +194,13 @@ public class UI_MainPopUp : UI_PopUp
             return;
         }
 
-        _front.rectTransform.anchoredPosition += Vector2.left * 5;
-        _back.rectTransform.anchoredPosition += Vector2.left * 5;
+        _front.rectTransform.anchoredPosition += Vector2.left * MoveSpeed;
+        _back.rectTransform.anchoredPosition += Vector2.left * MoveSpeed;
     }
 
     void ReverseField()
     {
-        _front.rectTransform.anchoredPosition = Vector2.right * FieldMax;
+        _front.rectTransform.anchoredPosition = _back.rectTransform.anchoredPosition + (Vector2.right * FieldMax);
         Image temp = _front;
         _front = _back;
         _back = temp;
@@ -211,11 +213,15 @@ public class UI_MainPopUp : UI_PopUp
 
     void SpawnEnemy()
     {
-        // ToDo: _backEnemy를 랜덤 몹 스프라이트로 갱신
-        //Managers.Resc.Load<Sprite>("", (op) =>
-        //{
-        //    _backEnemy.sprite = op;
-        //});
+        int id = Managers.Game.GetNextEnemyId();
+        if (id < 0)
+        {
+            OnNextStage();
+            return;
+        }
+            
+        string name = ConstValue.Enemy + id;
+        Managers.Resc.Load<Sprite>(name, (op) => { _backEnemy.sprite = op; });
     }
 
     IEnumerator Combat()
@@ -257,12 +263,25 @@ public class UI_MainPopUp : UI_PopUp
     {
         _onCombat = false;
         _playerAnimator.SetBool(AnimVar.OnCombat.ToString(), false);
-        _frontEnemy.gameObject.SetActive(false);
         _hpBarBg.gameObject.SetActive(false);
+        DrawEnemyDead();
 
-        if(Managers.Game.OnEnemyDie())
+        if (Managers.Game.OnEnemyDie())
             UpdateStageText();
         UpdateGoldGem();
+    }
+
+    void DrawEnemyDead()
+    {
+        // 적 처치 시 스프라이트 세팅
+        name = ConstValue.EnemyDie + Managers.Game.GetCurEnemyId();
+        Managers.Resc.Load<Sprite>(name, (op) => { _frontEnemy.sprite = op; });
+    }
+
+    void OnNextStage()
+    {
+        // ToDo: 스테이지 이동 연출
+
     }
     #endregion
 
@@ -285,6 +304,18 @@ public class UI_MainPopUp : UI_PopUp
         }
         stage += stageIdx;
         _stageText.text = STAGE + floor + " - " + stage;
+    }
+    #endregion
+
+    #region Input Action
+    void OnEscape()
+    {
+        // 최상위 팝업 닫기
+        if (Managers.UI.ClosePopUp())
+            return;
+
+        // 팝업이 없다면 종료 팝업 띄우기
+        Managers.UI.OpenPopUp<UI_ExitPopUp>(typeof(UI_ExitPopUp).Name, transform);
     }
     #endregion
 }

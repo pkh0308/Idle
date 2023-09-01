@@ -57,23 +57,58 @@ public class UI_TreasurePopUp : UI_PopUp
     #region 버튼
     public void Btn_OnClickAtkPower()
     {
-        Debug.Log("싸움꾼의 장갑 구매");
+        if (Managers.Game.BuyTreasure_AtkPow() == false)
+        {
+            Managers.UI.OpenNotice(ConstValue.Notice_NotEnoughMoney);
+            return;
+        }
+
+        Managers.Sound.PlaySfx(SoundManager.Sfxs.Sound_Upgrade);
+        UpdateBtns();
     }
     public void Btn_OnClickAtkSpeed()
     {
-        Debug.Log("신속의 깃털 구매");
+        if (Managers.Game.BuyTreasure_AtkSpd() == false)
+        {
+            Managers.UI.OpenNotice(ConstValue.Notice_NotEnoughMoney);
+            return;
+        }
+
+        Managers.Sound.PlaySfx(SoundManager.Sfxs.Sound_Upgrade);
+        UpdateBtns();
     }
     public void Btn_OnClickCritChance()
     {
-        Debug.Log("행운의 반지 구매");
+        if (Managers.Game.BuyTreasure_CritChance() == false)
+        {
+            Managers.UI.OpenNotice(ConstValue.Notice_NotEnoughMoney);
+            return;
+        }
+
+        Managers.Sound.PlaySfx(SoundManager.Sfxs.Sound_Upgrade);
+        UpdateBtns();
     }
     public void Btn_OnClickCritDamage()
     {
-        Debug.Log("바이킹의 투구 구매");
+        if (Managers.Game.BuyTreasure_CritDmg() == false)
+        {
+            Managers.UI.OpenNotice(ConstValue.Notice_NotEnoughMoney);
+            return;
+        }
+
+        Managers.Sound.PlaySfx(SoundManager.Sfxs.Sound_Upgrade);
+        UpdateBtns();
     }
     public void Btn_OnClickGoldUp()
     {
-        Debug.Log("부자의 왕관 구매");
+        if (Managers.Game.BuyTreasure_GoldUp() == false)
+        {
+            Managers.UI.OpenNotice(ConstValue.Notice_NotEnoughMoney);
+            return;
+        }
+
+        Managers.Sound.PlaySfx(SoundManager.Sfxs.Sound_Upgrade);
+        UpdateBtns();
     }
     #endregion
 
@@ -86,11 +121,11 @@ public class UI_TreasurePopUp : UI_PopUp
         int critDmg = (int)Buttons.CritDamageBtn;
         int goldUp = (int)Buttons.GoldUpBtn;
 
-        _atkPowerBtnText.text = Custom.CalUnit(Managers.Data.GetTreasureCost(atkPow, Managers.Game.AtkPowerLv));
-        _atkSpeedBtnText.text = Custom.CalUnit(Managers.Data.GetTreasureCost(atkSpd, Managers.Game.AtkPowerLv));
-        _critChanceBtnText.text = Custom.CalUnit(Managers.Data.GetTreasureCost(critChance, Managers.Game.AtkPowerLv));
-        _critDamageBtnText.text = Custom.CalUnit(Managers.Data.GetTreasureCost(critDmg, Managers.Game.AtkPowerLv));
-        _goldUpBtnText.text = Custom.CalUnit(Managers.Data.GetTreasureCost(goldUp, Managers.Game.AtkPowerLv));
+        _atkPowerBtnText.text = Custom.CalUnit(Managers.Data.GetTreasureCost(atkPow, Managers.Game.Tr_AtkPowerLv));
+        _atkSpeedBtnText.text = Custom.CalUnit(Managers.Data.GetTreasureCost(atkSpd, Managers.Game.Tr_AtkSpeedLv));
+        _critChanceBtnText.text = Custom.CalUnit(Managers.Data.GetTreasureCost(critChance, Managers.Game.Tr_CritChanceLv));
+        _critDamageBtnText.text = Custom.CalUnit(Managers.Data.GetTreasureCost(critDmg, Managers.Game.Tr_CritDamageLv));
+        _goldUpBtnText.text = Custom.CalUnit(Managers.Data.GetTreasureCost(goldUp, Managers.Game.Tr_GoldUpLv));
     }
     #endregion
 }

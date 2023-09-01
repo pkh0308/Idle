@@ -4,12 +4,11 @@ using UnityEngine;
 
 public class SoundManager 
 {
-    #region 열거형
+    #region 열거형 및 변수
     public enum AudioType
     {
         Bgm,
-        Sfx,
-        Voice
+        Sfx
     }
     public enum Bgms
     {
@@ -22,14 +21,11 @@ public class SoundManager
         Sound_BtnClick,
         Sound_Attack
     }
-    public enum Voices
-    {
-
-    }
-    #endregion
+    
     Dictionary<string, AudioSource> _sources = new Dictionary<string, AudioSource>();
     Dictionary<Type, AudioClip[]> _audioClips = new Dictionary<Type, AudioClip[]>();
     int loadingCount = 0;
+    #endregion
 
     #region 초기화
     public void Init()
@@ -55,7 +51,6 @@ public class SoundManager
     {
         LoadAudio(typeof(Bgms));
         LoadAudio(typeof(Sfxs));
-        LoadAudio(typeof(Voices));
     }
 
     void LoadAudio(Type type)
@@ -80,7 +75,7 @@ public class SoundManager
         if (loadingCount == 0)
             OnLoadCompleted();
     }
-
+    // 로드 완료 후에 실행할 내용 생기면 추가
     void OnLoadCompleted()
     {
 
@@ -90,7 +85,6 @@ public class SoundManager
     #region 재생 / 정지
     public void PlayBgm(Bgms bgm, float volume = 1.0f) { Play(AudioType.Bgm, typeof(Bgms), (int)bgm, volume); }
     public void PlaySfx(Sfxs sfx, float volume = 1.0f) { Play(AudioType.Sfx, typeof(Sfxs), (int)sfx, volume); }
-    public void PlayVoice(Voices voice, float volume = 1.0f) { Play(AudioType.Voice, typeof(Voices), (int)voice, volume); }
 
     void Play(AudioType audioType, Type type, int idx, float volume = 1.0f)
     {
@@ -107,11 +101,6 @@ public class SoundManager
             case AudioType.Sfx:
                 source.volume = volume;
                 source.PlayOneShot(clip);
-                break;
-            case AudioType.Voice:
-                source.clip = clip;
-                source.volume = volume;
-                source.Play();
                 break;
         }
     }

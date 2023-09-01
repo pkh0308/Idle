@@ -10,7 +10,7 @@ public class MainSceneController : SceneController
             return false;
 
         _initialized = true;
-        Managers.UI.OpenPopUp<UI_MainPopUp>();
+        Managers.UI.OpenScene<UI_MainPopUp>();
         return true;
     }
 }

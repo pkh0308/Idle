@@ -4,6 +4,8 @@ public class ConstValue
 {
     public const string EventSystem = "EventSystem";
     public const string Max = "Max";
+    public const string Enemy = "Enemy_";
+    public const string EnemyDie = "EnemyDie_";
 
     // notice
     public const string Notice_LessThan2 = "닉네임은 2자 이상이어야 합니다.";
@@ -78,6 +80,7 @@ public class ConstValue
     public enum ShopDataVal
     {
         Name,
+        Cost,
         MaxCount,
         GoodsType,
         GoodsValue

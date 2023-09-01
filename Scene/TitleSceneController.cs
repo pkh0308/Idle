@@ -10,7 +10,7 @@ public class TitleSceneController : SceneController
             return false;
 
         _initialized = true;
-        Managers.UI.OpenPopUp<UI_TitlePopUp>();
+        Managers.UI.OpenScene<UI_TitlePopUp>();
         return true;
     }
 }

@@ -56,7 +56,7 @@ public class DataManager
             int critDmgLv = System.Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.CritDmgLv.ToString()));
             int goldUpLv = System.Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.GoldUpLv.ToString()));
 
-            int weaponLv = System.Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.GoldUpLv.ToString()));
+            int weaponLv = System.Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.WeaponLv.ToString()));
 
             int tr_atkPowLv = System.Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.Treasure_AtkPowLv.ToString()));
             int tr_atkSpeedLv = System.Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.Treasure_AtkSpdLv.ToString()));
@@ -338,12 +338,13 @@ public class DataManager
         {
             // 속성 읽어오기
             string name = node.GetAttribute(ConstValue.ShopDataVal.Name.ToString());
+            int cost = System.Convert.ToInt32(node.GetAttribute(ConstValue.ShopDataVal.Cost.ToString()));
             int maxCount = System.Convert.ToInt32(node.GetAttribute(ConstValue.ShopDataVal.MaxCount.ToString()));
             int goodsType = System.Convert.ToInt32(node.GetAttribute(ConstValue.ShopDataVal.GoodsType.ToString()));
             int goodsValue = System.Convert.ToInt32(node.GetAttribute(ConstValue.ShopDataVal.GoodsValue.ToString()));
 
             //가져온 데이터 저장
-            ShopData data = new ShopData(name, maxCount, goodsType, goodsValue);
+            ShopData data = new ShopData(name, cost, maxCount, goodsType, goodsValue);
             _shopDatas.Add(idx, data);
             idx++;
         }

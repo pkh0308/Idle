@@ -57,12 +57,13 @@ public class UI_WeaponPopUp : UI_PopUp
     #region ¹öÆ°
     public void Btn_OnClickHammerBuy()
     {
-        if(Managers.Game.WeaponLv > (int)Buttons.HammerBuyBtn)
+        int level = (int)Buttons.HammerBuyBtn;
+        if (Managers.Game.WeaponLv > level)
             return;
         
-        if(Managers.Game.BuyWeapon() == false)
+        if(Managers.Game.BuyWeapon(level) == false)
         {
-            Managers.UI.OpenNotice(ConstValue.Notice_NotEnoughMoney, transform);
+            Managers.UI.OpenNotice(ConstValue.Notice_NotEnoughMoney);
             return;
         }
 
@@ -71,12 +72,13 @@ public class UI_WeaponPopUp : UI_PopUp
     }
     public void Btn_OnClickSpearBuy()
     {
-        if (Managers.Game.WeaponLv > (int)Buttons.SpearBuyBtn)
+        int level = (int)Buttons.SpearBuyBtn;
+        if (Managers.Game.WeaponLv > level)
             return;
 
-        if (Managers.Game.BuyWeapon() == false)
+        if (Managers.Game.BuyWeapon(level) == false)
         {
-            Managers.UI.OpenNotice(ConstValue.Notice_NotEnoughMoney, transform);
+            Managers.UI.OpenNotice(ConstValue.Notice_NotEnoughMoney);
             return;
         }
 
@@ -85,12 +87,13 @@ public class UI_WeaponPopUp : UI_PopUp
     }
     public void Btn_OnClickAxeBuy()
     {
-        if (Managers.Game.WeaponLv > (int)Buttons.AxeBuyBtn)
+        int level = (int)Buttons.AxeBuyBtn;
+        if (Managers.Game.WeaponLv > level)
             return;
 
-        if (Managers.Game.BuyWeapon() == false)
+        if (Managers.Game.BuyWeapon(level) == false)
         {
-            Managers.UI.OpenNotice(ConstValue.Notice_NotEnoughMoney, transform);
+            Managers.UI.OpenNotice(ConstValue.Notice_NotEnoughMoney);
             return;
         }
 
@@ -99,12 +102,13 @@ public class UI_WeaponPopUp : UI_PopUp
     }
     public void Btn_OnClickSwordBuy()
     {
-        if (Managers.Game.WeaponLv > (int)Buttons.SwordBuyBtn)
+        int level = (int)Buttons.SwordBuyBtn;
+        if (Managers.Game.WeaponLv > level)
             return;
 
-        if (Managers.Game.BuyWeapon() == false)
+        if (Managers.Game.BuyWeapon(level) == false)
         {
-            Managers.UI.OpenNotice(ConstValue.Notice_NotEnoughMoney, transform);
+            Managers.UI.OpenNotice(ConstValue.Notice_NotEnoughMoney);
             return;
         }
 
@@ -113,12 +117,13 @@ public class UI_WeaponPopUp : UI_PopUp
     }
     public void Btn_OnClickTwinSwordsBuy()
     {
-        if (Managers.Game.WeaponLv > (int)Buttons.TwinSwordsBuyBtn)
+        int level = (int)Buttons.TwinSwordsBuyBtn;
+        if (Managers.Game.WeaponLv > level)
             return;
 
-        if (Managers.Game.BuyWeapon() == false)
+        if (Managers.Game.BuyWeapon(level) == false)
         {
-            Managers.UI.OpenNotice(ConstValue.Notice_NotEnoughMoney, transform);
+            Managers.UI.OpenNotice(ConstValue.Notice_NotEnoughMoney);
             return;
         }
 

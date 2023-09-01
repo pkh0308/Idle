@@ -23,7 +23,7 @@ public class GameManager
         curState = GameState.Title;
     }
 
-    #region GameData 관리
+    #region GameData
     public int AtkPowerLv { get; private set; }
     public int AtkSpeedLv { get; private set; }
     public int CritChanceLv { get; private set; }
@@ -32,11 +32,11 @@ public class GameManager
 
     public int WeaponLv { get; private set; }
 
-    public int Tr_atkPowerLv { get; private set; }
-    public int Tr_atkSpeedLv { get; private set; }
-    public int Tr_critChanceLv { get; private set; }
-    public int Tr_critDamageLv { get; private set; }
-    public int Tr_goldUpLv { get; private set; }
+    public int Tr_AtkPowerLv { get; private set; }
+    public int Tr_AtkSpeedLv { get; private set; }
+    public int Tr_CritChanceLv { get; private set; }
+    public int Tr_CritDamageLv { get; private set; }
+    public int Tr_GoldUpLv { get; private set; }
 
     public string NickName { get; private set; }
     public int CurGold { get; private set; }
@@ -55,11 +55,11 @@ public class GameManager
 
         WeaponLv = data.WeaponLv;
 
-        Tr_atkPowerLv = data.Treasure_AtkPowLv;
-        Tr_atkSpeedLv = data.Treasure_AtkSpdLv;
-        Tr_critChanceLv = data.Treasure_CritChanceLv;
-        Tr_critDamageLv = data.Treasure_CritDmgLv;
-        Tr_goldUpLv = data.Treasure_GoldUpLv;
+        Tr_AtkPowerLv = data.Treasure_AtkPowLv;
+        Tr_AtkSpeedLv = data.Treasure_AtkSpdLv;
+        Tr_CritChanceLv = data.Treasure_CritChanceLv;
+        Tr_CritDamageLv = data.Treasure_CritDmgLv;
+        Tr_GoldUpLv = data.Treasure_GoldUpLv;
 
         NickName = data.NickName;
         CurGold = data.CurGold;
@@ -73,7 +73,7 @@ public class GameManager
             return;
 
         GameData data = new GameData(AtkPowerLv, AtkSpeedLv, CritChanceLv, CritDamageLv, GoldUpLv, WeaponLv,
-                                     Tr_atkPowerLv, Tr_atkSpeedLv, Tr_critChanceLv, Tr_critDamageLv, Tr_goldUpLv,
+                                     Tr_AtkPowerLv, Tr_AtkSpeedLv, Tr_CritChanceLv, Tr_CritDamageLv, Tr_GoldUpLv,
                                      NickName, CurGold, CurGem, CurStageIdx);
         Managers.Data.SetGameData(data);
     }
@@ -152,7 +152,8 @@ public class GameManager
         _critDmg = Managers.Data.GetEnahnceValue((int)ConstValue.Enhances.CritDmg, CritDamageLv);
         _goldUp = Managers.Data.GetEnahnceValue((int)ConstValue.Enhances.GoldUp, GoldUpLv);
     }
-    
+
+    int[] _enemyIds;
     public void InitStage()
     {
         _stageData = Managers.Data.GetStageData(CurStageIdx);
@@ -160,14 +161,19 @@ public class GameManager
         EnemyHp = MaxEnemyHp;
         _maxEnemyCount = _stageData.EnemyCount;
         _curEnemyCount = 0;
+
+        _enemyIds = new int[_stageData.EnemyCount];
+        for(int i = 0; i < _enemyIds.Length; i++)
+            _enemyIds[i] = Random.Range(_stageData.MinEnemyId, _stageData.MaxEnemyId + 1);
     }
 
     public void Attack()
     {
-        bool critical = Random.Range(0, 10000) < _critChance;
-        int dmg = _atkPow;
+        WeaponData wData = Managers.Data.GetWeaponData(WeaponLv);
+        bool critical = Random.Range(0, 10000) < _critChance + wData.CritChance;
+        int dmg = _atkPow + wData.AtkPower;
         if(critical) 
-            dmg = (int)(dmg * (_critDmg / 10000.0f));
+            dmg = (int)(dmg * (_critDmg + wData.CritDamage / 10000.0f));
 
         EnemyHp -= dmg;
     }
@@ -190,6 +196,9 @@ public class GameManager
 
     public void GetGoldFromEnemy() { CurGold += (int)(_stageData.DropGold * (_goldUp / 10000.0f)); }
     public void GetGemFromEnemy() { CurGem += _stageData.DropGem; }
+
+    public int GetCurEnemyId() { return _enemyIds[_curEnemyCount]; }
+    public int GetNextEnemyId() { return _curEnemyCount + 1 < _maxEnemyCount ? _enemyIds[_curEnemyCount + 1] : -1; }
     #endregion
 
     #region 강화
@@ -206,7 +215,24 @@ public class GameManager
             return false;
 
         // 해당하는 강화 레벨 증가
-
+        switch (idx)
+        {
+            case (int)ConstValue.Enhances.AtkPow:
+                AtkPowerLv++;
+                break;
+            case (int)ConstValue.Enhances.AtkSpd:
+                AtkSpeedLv++;
+                break;
+            case (int)ConstValue.Enhances.CritChance:
+                CritChanceLv++;
+                break;
+            case (int)ConstValue.Enhances.CritDmg:
+                CritDamageLv++;
+                break;
+            case (int)ConstValue.Enhances.GoldUp:
+                GoldUpLv++;
+                break;
+        }
         return true;
     }
 
@@ -218,9 +244,12 @@ public class GameManager
     #endregion
 
     #region 무기
-    public bool BuyWeapon()
+    public bool BuyWeapon(int level)
     {
-        WeaponData wData = Managers.Data.GetWeaponData(WeaponLv);
+        if (level < WeaponLv)
+            return false;
+
+        WeaponData wData = Managers.Data.GetWeaponData(level);
         if (wData == null)
         {
             Debug.Log($"Wrong weaponLv to buy: {WeaponLv}");
@@ -230,24 +259,65 @@ public class GameManager
         if (Purchase(ConstValue.Goods.Gold, wData.Cost) == false)
             return false;
 
-        WeaponLv++;
+        WeaponLv = level + 1;
         return true;
     }
     #endregion
 
     #region 보물
-    public bool BuyTreasure()
+    bool BuyTreasure(int idx, int level)
     {
+        int cost = Managers.Data.GetTreasureCost(idx, level);
+        if (cost < 0)
+        {
+            Debug.Log($"Wrong Enhance idx or level: {idx}, {level}");
+            return false;
+        }
 
+        if (Purchase(ConstValue.Goods.Gem, cost) == false)
+            return false;
 
+        // 해당하는 강화 레벨 증가
+        switch(idx)
+        {
+            case (int)ConstValue.Treasures.Tr_AtkPow:
+                Tr_AtkPowerLv++;
+                break;
+            case (int)ConstValue.Treasures.Tr_AtkSpd:
+                Tr_AtkSpeedLv++;
+                break;
+            case (int)ConstValue.Treasures.Tr_CritChance:
+                Tr_CritChanceLv++;
+                break;
+            case (int)ConstValue.Treasures.Tr_CritDmg:
+                Tr_CritDamageLv++;
+                break;
+            case (int)ConstValue.Treasures.Tr_GoldUp:
+                Tr_GoldUpLv++;
+                break;
+        }    
         return true;
     }
+
+    public bool BuyTreasure_AtkPow() { return BuyTreasure((int)ConstValue.Treasures.Tr_AtkPow, Tr_AtkPowerLv); }
+    public bool BuyTreasure_AtkSpd() { return BuyTreasure((int)ConstValue.Treasures.Tr_AtkSpd, Tr_AtkSpeedLv); }
+    public bool BuyTreasure_CritChance() { return BuyTreasure((int)ConstValue.Treasures.Tr_CritChance, Tr_CritChanceLv); }
+    public bool BuyTreasure_CritDmg() { return BuyTreasure((int)ConstValue.Treasures.Tr_CritDmg, Tr_CritDamageLv); }
+    public bool BuyTreasure_GoldUp() { return BuyTreasure((int)ConstValue.Treasures.Tr_GoldUp, Tr_GoldUpLv); }
     #endregion
 
     #region 상점
-    public bool BuyShopGoods()
+    public bool BuyShopGoods(int idx)
     {
+        ShopData data = Managers.Data.GetShopData(idx);
+        if(data.MaxCount > 0) // 광고 시청 상품
+        {
+            
+        }
+        else
+        {
 
+        }
 
         return true;
     }

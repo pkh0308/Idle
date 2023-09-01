@@ -4,26 +4,43 @@ using UnityEngine;
 public class UIManager 
 {
     Stack<UI_PopUp> _stack = new Stack<UI_PopUp>();
+    Transform _baseTransform;
 
     public void Init()
     {
         
     }
 
-    public void OpenPopUp<T>(string name = null, Transform parent = null) where T : UI_PopUp
+    // 씬의 기본이 되는 UI(캔버스 포함) 오픈
+    // 공지 팝업을 띄울 _baseTransform을 해당 객체의 트랜스폼으로 설정
+    public void OpenScene<T>() where T: UI_PopUp
+    {
+        Managers.Resc.Instantiate(typeof(T).Name, null, (op) => {
+            _baseTransform = op.transform;
+            Custom.GetOrAddComponent<T>(op);
+        });
+    }
+
+    // 기타 UI 오픈
+    // 닫지 않을 팝업이라면 doStack = false로 호출
+    public void OpenPopUp<T>(string name = null, Transform parent = null, bool doStack = true) where T : UI_PopUp
     {
         if (name == null)
             name = typeof(T).Name;
         
         Managers.Resc.Instantiate(name, parent, (op) => {
             op.transform.SetParent(parent);
-            _stack.Push(Custom.GetOrAddComponent<T>(op));
+            T target = Custom.GetOrAddComponent<T>(op);
+            if(doStack)
+                _stack.Push(target);
         });
     }
 
     public void OpenNotice(string notice, Transform parent = null)
     {
         string name = typeof(UI_NoticePopUp).Name;
+        if (parent == null)
+            parent = _baseTransform;
 
         Managers.Resc.Instantiate(name, parent, (op) => {
             UI_NoticePopUp np = Custom.GetOrAddComponent<UI_NoticePopUp>(op);
@@ -44,5 +61,14 @@ public class UIManager
             return;
         }
         Object.Destroy(_stack.Pop().gameObject);
+    }
+
+    public bool ClosePopUp()
+    {
+        if (_stack.Count == 0)
+            return false;
+        
+        Object.Destroy(_stack.Pop().gameObject);
+        return true;
     }
 }

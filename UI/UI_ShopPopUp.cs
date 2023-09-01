@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
@@ -80,17 +78,25 @@ public class UI_ShopPopUp : UI_PopUp
     #region UI 업데이트
     void UpdateBtns()
     {
-        int atkPow = (int)Buttons.GetGoldBtn_2hr;
-        int atkSpd = (int)Buttons.GetGoldBtn_5hr;
-        int critChance = (int)Buttons.GetGemBtn_100;
-        int critDmg = (int)Buttons.GetGemBtn_500;
-        int goldUp = (int)Buttons.GetGemBtn_2500;
+        int gold_2hr = (int)Buttons.GetGoldBtn_2hr;
+        int gold_5hr = (int)Buttons.GetGoldBtn_5hr;
+        int gem_100 = (int)Buttons.GetGemBtn_100;
+        int gem_500 = (int)Buttons.GetGemBtn_500;
+        int gem_2500 = (int)Buttons.GetGemBtn_2500;
 
-        //_getGoldBtnText_2hr.text = Custom.CalUnit(Managers.Data.GetEnahnceCost(atkPow, Managers.Game.AtkPowerLv));
-        //_getGoldBtnText_5hr.text = Custom.CalUnit(Managers.Data.GetEnahnceCost(atkSpd, Managers.Game.AtkPowerLv));
-        //_getGemBtnText_100.text = Custom.CalUnit(Managers.Data.GetEnahnceCost(critChance, Managers.Game.AtkPowerLv));
-        //_getGemBtnText_500.text = Custom.CalUnit(Managers.Data.GetEnahnceCost(critDmg, Managers.Game.AtkPowerLv));
-        //_getGemBtnText_2500.text = Custom.CalUnit(Managers.Data.GetEnahnceCost(goldUp, Managers.Game.AtkPowerLv));
+        _getGoldBtnText_2hr.text = GetCost(Managers.Data.GetShopData(gold_2hr));
+        _getGoldBtnText_5hr.text = GetCost(Managers.Data.GetShopData(gold_5hr));
+        _getGemBtnText_100.text = GetCost(Managers.Data.GetShopData(gem_100));
+        _getGemBtnText_500.text = GetCost(Managers.Data.GetShopData(gem_500));
+        _getGemBtnText_2500.text = GetCost(Managers.Data.GetShopData(gem_2500));
+    }
+
+    string GetCost(ShopData data)
+    {
+        if(data.MaxCount > 0) // 광고 상품
+            return $"({0} / {data.MaxCount})";
+        
+        return "￦ " + data.Cost.ToString();
     }
     #endregion
 }

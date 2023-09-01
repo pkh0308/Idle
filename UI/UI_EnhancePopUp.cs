@@ -18,6 +18,13 @@ public class UI_EnhancePopUp : UI_PopUp
         GoldUpText,
         GoldUpBtnText
     }
+    // 문구
+    TextMeshProUGUI _atkPowerText;
+    TextMeshProUGUI _atkSpeedText;
+    TextMeshProUGUI _critChanceText;
+    TextMeshProUGUI _critDamageText;
+    TextMeshProUGUI _goldUpText;
+    // 가격
     TextMeshProUGUI _atkPowerBtnText;
     TextMeshProUGUI _atkSpeedBtnText;
     TextMeshProUGUI _critChanceBtnText;
@@ -37,6 +44,12 @@ public class UI_EnhancePopUp : UI_PopUp
     {
         BindText(typeof(Texts));
         BindButton(typeof(Buttons));
+
+        _atkPowerText = GetText((int)Texts.AtkPowerText);
+        _atkSpeedText = GetText((int)Texts.AtkPowerText);
+        _critChanceText = GetText((int)Texts.AtkPowerText);
+        _critDamageText = GetText((int)Texts.AtkPowerText);
+        _goldUpText = GetText((int)Texts.AtkPowerText);
 
         _atkPowerBtnText = GetText((int)Texts.AtkPowerBtnText);
         _atkSpeedBtnText = GetText((int)Texts.AtkSpeedBtnText);
@@ -59,7 +72,7 @@ public class UI_EnhancePopUp : UI_PopUp
     {
         if(Managers.Game.EnhanceAtkPow() == false)
         {
-            Managers.UI.OpenNotice(ConstValue.Notice_NotEnoughMoney, transform);
+            Managers.UI.OpenNotice(ConstValue.Notice_NotEnoughMoney);
             return;
         }
 
@@ -70,7 +83,7 @@ public class UI_EnhancePopUp : UI_PopUp
     {
         if (Managers.Game.EnhanceAtkSpd() == false)
         {
-            Managers.UI.OpenNotice(ConstValue.Notice_NotEnoughMoney, transform);
+            Managers.UI.OpenNotice(ConstValue.Notice_NotEnoughMoney);
             return;
         }
 
@@ -81,7 +94,7 @@ public class UI_EnhancePopUp : UI_PopUp
     {
         if (Managers.Game.EnhanceCritChance() == false)
         {
-            Managers.UI.OpenNotice(ConstValue.Notice_NotEnoughMoney, transform);
+            Managers.UI.OpenNotice(ConstValue.Notice_NotEnoughMoney);
             return;
         }
 
@@ -92,7 +105,7 @@ public class UI_EnhancePopUp : UI_PopUp
     {
         if (Managers.Game.EnhanceCritDamage() == false)
         {
-            Managers.UI.OpenNotice(ConstValue.Notice_NotEnoughMoney, transform);
+            Managers.UI.OpenNotice(ConstValue.Notice_NotEnoughMoney);
             return;
         }
 
@@ -103,7 +116,7 @@ public class UI_EnhancePopUp : UI_PopUp
     {
         if (Managers.Game.EnhanceGoldUp() == false)
         {
-            Managers.UI.OpenNotice(ConstValue.Notice_NotEnoughMoney, transform);
+            Managers.UI.OpenNotice(ConstValue.Notice_NotEnoughMoney);
             return;
         }
 
@@ -121,11 +134,25 @@ public class UI_EnhancePopUp : UI_PopUp
         int critDmg = (int)Buttons.CritDamageBtn;
         int goldUp = (int)Buttons.GoldUpBtn;
 
+        _atkPowerText.text = $"공격력 증가 (Lv.{GetLevel(atkPow, Managers.Game.AtkPowerLv)})";
+        _atkSpeedText.text = $"공격속도 증가 (Lv.{GetLevel(atkSpd, Managers.Game.AtkSpeedLv)})";
+        _critChanceText.text = $"치명타 확률 증가 (Lv.{GetLevel(critChance, Managers.Game.CritChanceLv)})";
+        _critDamageText.text = $"치명타 데미지 증가 (Lv.{GetLevel(critDmg, Managers.Game.CritDamageLv)})";
+        _goldUpText.text = $"획득 골드 증가 (Lv.{GetLevel(goldUp, Managers.Game.GoldUpLv)})";
+
         _atkPowerBtnText.text = Custom.CalUnit(Managers.Data.GetEnahnceCost(atkPow, Managers.Game.AtkPowerLv));
         _atkSpeedBtnText.text = Custom.CalUnit(Managers.Data.GetEnahnceCost(atkSpd, Managers.Game.AtkPowerLv));
         _critChanceBtnText.text = Custom.CalUnit(Managers.Data.GetEnahnceCost(critChance, Managers.Game.AtkPowerLv));
         _critDamageBtnText.text = Custom.CalUnit(Managers.Data.GetEnahnceCost(critDmg, Managers.Game.AtkPowerLv));
         _goldUpBtnText.text = Custom.CalUnit(Managers.Data.GetEnahnceCost(goldUp, Managers.Game.AtkPowerLv));
+    }
+
+    string GetLevel(int idx, int level)
+    {
+        if (Managers.Data.GetEnahnceCost(0, level) < 0)
+            return ConstValue.Max;
+
+        return (level + 1).ToString();
     }
     #endregion
 }
