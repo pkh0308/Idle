@@ -46,10 +46,10 @@ public class UI_EnhancePopUp : UI_PopUp
         BindButton(typeof(Buttons));
 
         _atkPowerText = GetText((int)Texts.AtkPowerText);
-        _atkSpeedText = GetText((int)Texts.AtkPowerText);
-        _critChanceText = GetText((int)Texts.AtkPowerText);
-        _critDamageText = GetText((int)Texts.AtkPowerText);
-        _goldUpText = GetText((int)Texts.AtkPowerText);
+        _atkSpeedText = GetText((int)Texts.AtkSpeedText);
+        _critChanceText = GetText((int)Texts.CritChanceText);
+        _critDamageText = GetText((int)Texts.CritDamageText);
+        _goldUpText = GetText((int)Texts.GoldUpText);
 
         _atkPowerBtnText = GetText((int)Texts.AtkPowerBtnText);
         _atkSpeedBtnText = GetText((int)Texts.AtkSpeedBtnText);

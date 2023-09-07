@@ -38,6 +38,7 @@ public class UI_Base : MonoBehaviour
     public void BindButton(Type type) { Bind<Button>(type); }
     public void BindImage(Type type) { Bind<Image>(type); }
     public void BindObject(Type type) { Bind<GameObject>(type); }
+    public void BindSlider(Type type) { Bind<Slider>(type); }
 
     void Bind<T>(Type type) where T : Object
     {
@@ -61,6 +62,7 @@ public class UI_Base : MonoBehaviour
     public Button GetButton(int idx) { return Get<Button>(idx); }
     public TextMeshProUGUI GetText(int idx) { return Get<TextMeshProUGUI>(idx); }
     public Image GetImage(int idx) { return Get<Image>(idx); }
+    public Slider GetSlider(int idx) { return Get<Slider>(idx); }
 
     T Get<T>(int idx) where T : Object
     {

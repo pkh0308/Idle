@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 using UnityEngine;
+using System;
 
 public class DataManager 
 {
@@ -50,29 +51,33 @@ public class DataManager
         foreach (XmlElement node in nodes.ChildNodes)
         {
             // 속성 읽어오기
-            int atkPowLv = System.Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.AtkPowLv.ToString()));
-            int atkSpeedLv = System.Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.AtkSpdLv.ToString()));
-            int critChanceLv = System.Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.CritChanceLv.ToString()));
-            int critDmgLv = System.Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.CritDmgLv.ToString()));
-            int goldUpLv = System.Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.GoldUpLv.ToString()));
+            int atkPowLv = Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.AtkPowLv.ToString()));
+            int atkSpeedLv = Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.AtkSpdLv.ToString()));
+            int critChanceLv = Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.CritChanceLv.ToString()));
+            int critDmgLv = Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.CritDmgLv.ToString()));
+            int goldUpLv = Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.GoldUpLv.ToString()));
 
-            int weaponLv = System.Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.WeaponLv.ToString()));
+            int weaponLv = Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.WeaponLv.ToString()));
 
-            int tr_atkPowLv = System.Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.Treasure_AtkPowLv.ToString()));
-            int tr_atkSpeedLv = System.Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.Treasure_AtkSpdLv.ToString()));
-            int tr_critChanceLv = System.Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.Treasure_CritChanceLv.ToString()));
-            int tr_critDmgLv = System.Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.Treasure_CritDmgLv.ToString()));
-            int tr_goldUpLv = System.Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.Treasure_GoldUpLv.ToString()));
+            int tr_atkPowLv = Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.Treasure_AtkPowLv.ToString()));
+            int tr_atkSpeedLv = Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.Treasure_AtkSpdLv.ToString()));
+            int tr_critChanceLv = Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.Treasure_CritChanceLv.ToString()));
+            int tr_critDmgLv = Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.Treasure_CritDmgLv.ToString()));
+            int tr_goldUpLv = Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.Treasure_GoldUpLv.ToString()));
 
             string nickname = node.GetAttribute(ConstValue.GameDataVal.NickName.ToString());
-            int curGold = System.Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.CurGold.ToString()));
-            int curGem = System.Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.CurGem.ToString()));
-            int stageIdx = System.Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.StageIdx.ToString()));
+            int curGold = Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.CurGold.ToString()));
+            int curGem = Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.CurGem.ToString()));
+            int stageIdx = Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.StageIdx.ToString()));
+
+            int lastYear = Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.LastAccessYear.ToString()));
+            int lastDayOfYear = Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.LastAccessDayOfYear.ToString()));
+            int lastMins = Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.LastAccessMinutes.ToString()));
 
             //가져온 데이터 저장
             GameData data = new GameData(atkPowLv, atkSpeedLv, critChanceLv, critDmgLv, goldUpLv, weaponLv,
                                          tr_atkPowLv, tr_atkSpeedLv, tr_critChanceLv, tr_critDmgLv, tr_goldUpLv, 
-                                         nickname, curGold, curGem, stageIdx);
+                                         nickname, curGold, curGem, stageIdx, lastYear, lastDayOfYear, lastMins);
             CurGameData = data;
         }
     }
@@ -90,7 +95,7 @@ public class DataManager
         doc.AppendChild(root);
 
         XmlElement element = doc.CreateElement("Data");
-        string[] names = System.Enum.GetNames(typeof(ConstValue.GameDataVal));
+        string[] names = Enum.GetNames(typeof(ConstValue.GameDataVal));
         for (int i = 0; i < names.Length; i++)
             element.SetAttribute(names[i], CurGameData.GetStringValue(i));
         root.AppendChild(element);
@@ -130,12 +135,12 @@ public class DataManager
         foreach (XmlElement node in nodes.ChildNodes)
         {
             // 속성 읽어오기
-            int hp = System.Convert.ToInt32(node.GetAttribute(ConstValue.StageDataVal.Hp.ToString()));
-            int enemyCount = System.Convert.ToInt32(node.GetAttribute(ConstValue.StageDataVal.EnemyCount.ToString()));
-            int minEnemyId = System.Convert.ToInt32(node.GetAttribute(ConstValue.StageDataVal.MinEnemyId.ToString()));
-            int maxEnemyId = System.Convert.ToInt32(node.GetAttribute(ConstValue.StageDataVal.MaxEnemyId.ToString()));
-            int dropGold = System.Convert.ToInt32(node.GetAttribute(ConstValue.StageDataVal.DropGold.ToString()));
-            int dropGem = System.Convert.ToInt32(node.GetAttribute(ConstValue.StageDataVal.DropGem.ToString()));
+            int hp = Convert.ToInt32(node.GetAttribute(ConstValue.StageDataVal.Hp.ToString()));
+            int enemyCount = Convert.ToInt32(node.GetAttribute(ConstValue.StageDataVal.EnemyCount.ToString()));
+            int minEnemyId = Convert.ToInt32(node.GetAttribute(ConstValue.StageDataVal.MinEnemyId.ToString()));
+            int maxEnemyId = Convert.ToInt32(node.GetAttribute(ConstValue.StageDataVal.MaxEnemyId.ToString()));
+            int dropGold = Convert.ToInt32(node.GetAttribute(ConstValue.StageDataVal.DropGold.ToString()));
+            int dropGem = Convert.ToInt32(node.GetAttribute(ConstValue.StageDataVal.DropGem.ToString()));
 
             //가져온 데이터 저장
             StageData data = new StageData(hp, enemyCount, minEnemyId, maxEnemyId, dropGold, dropGem);
@@ -184,17 +189,17 @@ public class DataManager
         foreach (XmlElement node in nodes.ChildNodes)
         {
             // 속성 읽어오기
-            int atkPowCost = System.Convert.ToInt32(node.GetAttribute(ConstValue.EnhanceDataVal.AtkPowCost.ToString()));
-            int atkSpdCost = System.Convert.ToInt32(node.GetAttribute(ConstValue.EnhanceDataVal.AtkSpdCost.ToString()));
-            int critChanceCost = System.Convert.ToInt32(node.GetAttribute(ConstValue.EnhanceDataVal.CritChanceCost.ToString()));
-            int critDmgCost = System.Convert.ToInt32(node.GetAttribute(ConstValue.EnhanceDataVal.CritDmgCost.ToString()));
-            int goldUpCost = System.Convert.ToInt32(node.GetAttribute(ConstValue.EnhanceDataVal.GoldUpCost.ToString()));
+            int atkPowCost = Convert.ToInt32(node.GetAttribute(ConstValue.EnhanceDataVal.AtkPowCost.ToString()));
+            int atkSpdCost = Convert.ToInt32(node.GetAttribute(ConstValue.EnhanceDataVal.AtkSpdCost.ToString()));
+            int critChanceCost = Convert.ToInt32(node.GetAttribute(ConstValue.EnhanceDataVal.CritChanceCost.ToString()));
+            int critDmgCost = Convert.ToInt32(node.GetAttribute(ConstValue.EnhanceDataVal.CritDmgCost.ToString()));
+            int goldUpCost = Convert.ToInt32(node.GetAttribute(ConstValue.EnhanceDataVal.GoldUpCost.ToString()));
 
-            int atkPowValue = System.Convert.ToInt32(node.GetAttribute(ConstValue.EnhanceDataVal.AtkPowValue.ToString()));
-            int atkSpdValue = System.Convert.ToInt32(node.GetAttribute(ConstValue.EnhanceDataVal.AtkSpdValue.ToString()));
-            int critChanceValue = System.Convert.ToInt32(node.GetAttribute(ConstValue.EnhanceDataVal.CritChanceValue.ToString()));
-            int critDmgValue = System.Convert.ToInt32(node.GetAttribute(ConstValue.EnhanceDataVal.CritDmgValue.ToString()));
-            int goldUpValue = System.Convert.ToInt32(node.GetAttribute(ConstValue.EnhanceDataVal.GoldUpValue.ToString()));
+            int atkPowValue = Convert.ToInt32(node.GetAttribute(ConstValue.EnhanceDataVal.AtkPowValue.ToString()));
+            int atkSpdValue = Convert.ToInt32(node.GetAttribute(ConstValue.EnhanceDataVal.AtkSpdValue.ToString()));
+            int critChanceValue = Convert.ToInt32(node.GetAttribute(ConstValue.EnhanceDataVal.CritChanceValue.ToString()));
+            int critDmgValue = Convert.ToInt32(node.GetAttribute(ConstValue.EnhanceDataVal.CritDmgValue.ToString()));
+            int goldUpValue = Convert.ToInt32(node.GetAttribute(ConstValue.EnhanceDataVal.GoldUpValue.ToString()));
 
             //가져온 데이터 저장
             EnhanceData data = new EnhanceData(atkPowCost, atkSpdCost, critChanceCost, critDmgCost, goldUpCost,
@@ -241,10 +246,10 @@ public class DataManager
         foreach (XmlElement node in nodes.ChildNodes)
         {
             // 속성 읽어오기
-            int atkPow = System.Convert.ToInt32(node.GetAttribute(ConstValue.WeaponDataVal.AtkPower.ToString()));
-            int critChance = System.Convert.ToInt32(node.GetAttribute(ConstValue.WeaponDataVal.CritChance.ToString()));
-            int critDamage = System.Convert.ToInt32(node.GetAttribute(ConstValue.WeaponDataVal.CritDamage.ToString()));
-            int cost = System.Convert.ToInt32(node.GetAttribute(ConstValue.WeaponDataVal.Cost.ToString()));
+            int atkPow = Convert.ToInt32(node.GetAttribute(ConstValue.WeaponDataVal.AtkPower.ToString()));
+            int critChance = Convert.ToInt32(node.GetAttribute(ConstValue.WeaponDataVal.CritChance.ToString()));
+            int critDamage = Convert.ToInt32(node.GetAttribute(ConstValue.WeaponDataVal.CritDamage.ToString()));
+            int cost = Convert.ToInt32(node.GetAttribute(ConstValue.WeaponDataVal.Cost.ToString()));
 
             //가져온 데이터 저장
             WeaponData data = new WeaponData(atkPow, critChance, critDamage, cost);
@@ -283,17 +288,17 @@ public class DataManager
         foreach (XmlElement node in nodes.ChildNodes)
         {
             // 속성 읽어오기
-            int atkPowCost = System.Convert.ToInt32(node.GetAttribute(ConstValue.TreasureDataVal.Tr_AtkPowCost.ToString()));
-            int atkSpdCost = System.Convert.ToInt32(node.GetAttribute(ConstValue.TreasureDataVal.Tr_AtkSpdCost.ToString()));
-            int critChanceCost = System.Convert.ToInt32(node.GetAttribute(ConstValue.TreasureDataVal.Tr_CritChanceCost.ToString()));
-            int critDmgCost = System.Convert.ToInt32(node.GetAttribute(ConstValue.TreasureDataVal.Tr_CritDmgCost.ToString()));
-            int goldUpCost = System.Convert.ToInt32(node.GetAttribute(ConstValue.TreasureDataVal.Tr_GoldUpCost.ToString()));
+            int atkPowCost = Convert.ToInt32(node.GetAttribute(ConstValue.TreasureDataVal.Tr_AtkPowCost.ToString()));
+            int atkSpdCost = Convert.ToInt32(node.GetAttribute(ConstValue.TreasureDataVal.Tr_AtkSpdCost.ToString()));
+            int critChanceCost = Convert.ToInt32(node.GetAttribute(ConstValue.TreasureDataVal.Tr_CritChanceCost.ToString()));
+            int critDmgCost = Convert.ToInt32(node.GetAttribute(ConstValue.TreasureDataVal.Tr_CritDmgCost.ToString()));
+            int goldUpCost = Convert.ToInt32(node.GetAttribute(ConstValue.TreasureDataVal.Tr_GoldUpCost.ToString()));
 
-            int atkPowValue = System.Convert.ToInt32(node.GetAttribute(ConstValue.TreasureDataVal.Tr_AtkPowValue.ToString()));
-            int atkSpdValue = System.Convert.ToInt32(node.GetAttribute(ConstValue.TreasureDataVal.Tr_AtkSpdValue.ToString()));
-            int critChanceValue = System.Convert.ToInt32(node.GetAttribute(ConstValue.TreasureDataVal.Tr_CritChanceValue.ToString()));
-            int critDmgValue = System.Convert.ToInt32(node.GetAttribute(ConstValue.TreasureDataVal.Tr_CritDmgValue.ToString()));
-            int goldUpValue = System.Convert.ToInt32(node.GetAttribute(ConstValue.TreasureDataVal.Tr_GoldUpValue.ToString()));
+            int atkPowValue = Convert.ToInt32(node.GetAttribute(ConstValue.TreasureDataVal.Tr_AtkPowValue.ToString()));
+            int atkSpdValue = Convert.ToInt32(node.GetAttribute(ConstValue.TreasureDataVal.Tr_AtkSpdValue.ToString()));
+            int critChanceValue = Convert.ToInt32(node.GetAttribute(ConstValue.TreasureDataVal.Tr_CritChanceValue.ToString()));
+            int critDmgValue = Convert.ToInt32(node.GetAttribute(ConstValue.TreasureDataVal.Tr_CritDmgValue.ToString()));
+            int goldUpValue = Convert.ToInt32(node.GetAttribute(ConstValue.TreasureDataVal.Tr_GoldUpValue.ToString()));
 
             //가져온 데이터 저장
             TreasureData data = new TreasureData(atkPowCost, atkSpdCost, critChanceCost, critDmgCost, goldUpCost,
@@ -338,10 +343,10 @@ public class DataManager
         {
             // 속성 읽어오기
             string name = node.GetAttribute(ConstValue.ShopDataVal.Name.ToString());
-            int cost = System.Convert.ToInt32(node.GetAttribute(ConstValue.ShopDataVal.Cost.ToString()));
-            int maxCount = System.Convert.ToInt32(node.GetAttribute(ConstValue.ShopDataVal.MaxCount.ToString()));
-            int goodsType = System.Convert.ToInt32(node.GetAttribute(ConstValue.ShopDataVal.GoodsType.ToString()));
-            int goodsValue = System.Convert.ToInt32(node.GetAttribute(ConstValue.ShopDataVal.GoodsValue.ToString()));
+            int cost = Convert.ToInt32(node.GetAttribute(ConstValue.ShopDataVal.Cost.ToString()));
+            int maxCount = Convert.ToInt32(node.GetAttribute(ConstValue.ShopDataVal.MaxCount.ToString()));
+            int goodsType = Convert.ToInt32(node.GetAttribute(ConstValue.ShopDataVal.GoodsType.ToString()));
+            int goodsValue = Convert.ToInt32(node.GetAttribute(ConstValue.ShopDataVal.GoodsValue.ToString()));
 
             //가져온 데이터 저장
             ShopData data = new ShopData(name, cost, maxCount, goodsType, goodsValue);

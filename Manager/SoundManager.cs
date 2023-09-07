@@ -41,6 +41,8 @@ public class SoundManager
             go.transform.SetParent(source.transform);
             _sources.Add(names[i], go.GetComponent<AudioSource>());
         }
+        // bgm 소스는 루프 설정
+        _sources[AudioType.Bgm.ToString()].loop = true;
 
         LoadAudioClips();
     }
@@ -82,11 +84,17 @@ public class SoundManager
     }
     #endregion
 
-    #region 재생 / 정지
-    public void PlayBgm(Bgms bgm, float volume = 1.0f) { Play(AudioType.Bgm, typeof(Bgms), (int)bgm, volume); }
-    public void PlaySfx(Sfxs sfx, float volume = 1.0f) { Play(AudioType.Sfx, typeof(Sfxs), (int)sfx, volume); }
+    #region 볼륨 설정
+    float _sfxVolume = 1.0f;
+    public void SetBgmVolume(float value) { _sources[AudioType.Bgm.ToString()].volume = value; }
+    public void SetSfxVolume(float value) { _sfxVolume = value; }
+    #endregion
 
-    void Play(AudioType audioType, Type type, int idx, float volume = 1.0f)
+    #region 재생 / 정지
+    public void PlayBgm(Bgms bgm) { Play(AudioType.Bgm, typeof(Bgms), (int)bgm); }
+    public void PlaySfx(Sfxs sfx, float amplifier = 1.0f) { Play(AudioType.Sfx, typeof(Sfxs), (int)sfx, amplifier); }
+
+    void Play(AudioType audioType, Type type, int idx, float amplifier = 1.0f)
     {
         AudioClip clip = _audioClips[type][idx];
         AudioSource source = _sources[audioType.ToString()];
@@ -95,11 +103,10 @@ public class SoundManager
         {
             case AudioType.Bgm:
                 source.clip = clip;
-                source.volume = volume;
                 source.Play();
                 break;
             case AudioType.Sfx:
-                source.volume = volume;
+                source.volume = _sfxVolume * amplifier;
                 source.PlayOneShot(clip);
                 break;
         }

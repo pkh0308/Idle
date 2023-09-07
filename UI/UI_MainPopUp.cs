@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -28,14 +29,14 @@ public class UI_MainPopUp : UI_PopUp
         EnhanceBtn,
         WeaponBtn,
         TreasureBtn,
-        ShopBtn
+        ShopBtn,
+        SettingsBtn
     }
     enum Images
     {
         Field01,
         Field02,
-        Enemy01,
-        Enemy02,
+        EnemyField,
         HpBarBg,
         HpBar,
         Player,
@@ -44,32 +45,47 @@ public class UI_MainPopUp : UI_PopUp
         TreasureBtn,
         ShopBtn,
         GoldIcon,
-        GemIcon
+        GemIcon,
+        BlackScene
     }
+    Image _enhanceBtn;
+    Image _weaponBtn;
+    Image _treasureBtn;
+    Image _shopBtn;
+
     Image _front;
     Image _back;
-    Image _frontEnemy;
-    Image _backEnemy;
     Image _hpBar;
     Image _hpBarBg;
-    bool _onCombat = false;
+    Image _blackScene;
+    RectTransform _enemyField;
 
     const int FieldMax = 1440;
-    const int MoveSpeed = 3;
+    const int FieldOffset = 400;
+    const int MoveSpeed = 15;
 
     enum AnimVar
     {
         OnCombat,
-        DoAttack
+        DoAttack,
+        DoNextStage
     }
     Animator _playerAnimator;
 
-    enum State
+    enum Menus
     {
         Enhance,
         Weapon,
         Treasure,
         Shop
+    }
+    Menus curMenu;
+
+    enum State
+    {
+        Moving, 
+        OnCombat,
+        StageChange
     }
     State curState;
     #endregion
@@ -85,6 +101,7 @@ public class UI_MainPopUp : UI_PopUp
         Custom.GetOrAddComponent<UI_Base>(GetButton((int)Buttons.WeaponBtn).gameObject).BindEvent(Btn_OnClickWeapon);
         Custom.GetOrAddComponent<UI_Base>(GetButton((int)Buttons.TreasureBtn).gameObject).BindEvent(Btn_OnClickTreasure);
         Custom.GetOrAddComponent<UI_Base>(GetButton((int)Buttons.ShopBtn).gameObject).BindEvent(Btn_OnClickShop);
+        Custom.GetOrAddComponent<UI_Base>(GetButton((int)Buttons.SettingsBtn).gameObject).BindEvent(Btn_OnClickSettings);
 
         _nicknameText = GetText((int)Texts.NickNameText);
         _nicknameText.text = Managers.Game.NickName;
@@ -94,26 +111,36 @@ public class UI_MainPopUp : UI_PopUp
         _gemText = GetText((int)Texts.GemText);
         _gemText.text = Managers.Game.CurGold.ToString();
 
+        _enhanceBtn = GetImage((int)Images.EnhanceBtn);
+        _weaponBtn = GetImage((int)Images.WeaponBtn);
+        _treasureBtn = GetImage((int)Images.TreasureBtn);
+        _shopBtn = GetImage((int)Images.ShopBtn);
+
         _front = GetImage((int)Images.Field01);
         _back = GetImage((int)Images.Field02);
-        _frontEnemy = GetImage((int)Images.Enemy01);
-        _backEnemy = GetImage((int)Images.Enemy02);
         _hpBar = GetImage((int)Images.HpBar);
         _hpBarBg = GetImage((int)Images.HpBarBg);
+        _blackScene = GetImage((int)Images.BlackScene);
+        _blackScene.gameObject.SetActive(false);
+
+        _enemyField = GetImage((int)Images.EnemyField).rectTransform;
         _playerAnimator = GetImage((int)Images.Player).gameObject.GetComponent<Animator>();
 
+        if(Managers.Game.LastAccessMinutes > 0) // 이전 접속기록이 있다면 오프라인 보상
+            Managers.UI.OpenPopUp<UI_OfflineRewardPopUp>(typeof(UI_OfflineRewardPopUp).Name, transform);
         Managers.UI.OpenPopUp<UI_EnhancePopUp>(typeof(UI_EnhancePopUp).Name, transform, false);
-        curState = State.Enhance;
+        curMenu = Menus.Enhance;
+        curState = State.Moving;
 
         // UI 초기화
         UpdateGoldGem();
         UpdateStageText();
         InitialSetActiveFalse();
+        Managers.Game.SetCallBackForGoods(UpdateGoldGem);
         // 이동 & 전투 초기화
-        Managers.Game.InitStage();
+        InitStage();
         StartCoroutine(Idle());
         StartCoroutine(Combat());
-        SpawnEnemy();
         // Bgm
         Managers.Sound.PlayBgm(SoundManager.Bgms.Sound_Main);
         return true;
@@ -123,51 +150,114 @@ public class UI_MainPopUp : UI_PopUp
     void InitialSetActiveFalse()
     { 
         _hpBarBg.gameObject.SetActive(false);
-        _frontEnemy.gameObject.SetActive(false);
     }
     #endregion
 
     #region 버튼
     public void Btn_OnClickEnhance()
     {
-        if (curState == State.Enhance)
+        if (curMenu == Menus.Enhance)
             return;
 
         Managers.UI.OpenPopUp<UI_EnhancePopUp>(typeof(UI_EnhancePopUp).Name, transform, false);
-        curState = State.Enhance;
+        curMenu = Menus.Enhance;
+        UpdateMenuButtons();
     }
     public void Btn_OnClickWeapon()
     {
-        if (curState == State.Weapon)
+        if (curMenu == Menus.Weapon)
             return;
 
         Managers.UI.OpenPopUp<UI_WeaponPopUp>(typeof(UI_WeaponPopUp).Name, transform, false);
-        curState = State.Weapon;
+        curMenu = Menus.Weapon;
+        UpdateMenuButtons();
     }
     public void Btn_OnClickTreasure()
     {
-        if (curState == State.Treasure)
+        if (curMenu == Menus.Treasure)
             return;
 
         Managers.UI.OpenPopUp<UI_TreasurePopUp>(typeof(UI_TreasurePopUp).Name, transform, false);
-        curState = State.Treasure;
+        curMenu = Menus.Treasure;
+        UpdateMenuButtons();
     }
     public void Btn_OnClickShop()
     {
-        if (curState == State.Shop)
+        if (curMenu == Menus.Shop)
             return;
 
         Managers.UI.OpenPopUp<UI_ShopPopUp>(typeof(UI_ShopPopUp).Name, transform, false);
-        curState = State.Shop;
+        curMenu = Menus.Shop;
+        UpdateMenuButtons();
+    }
+
+    public void Btn_OnClickSettings()
+    {
+        Managers.UI.OpenPopUp<UI_SettingsPopUp>();
     }
     #endregion
 
     #region 전투 
+    List<Image> _enemies = new List<Image>(ConstValue.NumOfEnemies);
+    int _loadCount = 0;
+    int _combatLine = 0;
+
+    void InitStage()
+    {
+        // 데이터 갱신
+        Managers.Game.InitStage();
+
+        _loadCount = Managers.Game.MaxEnemyCount;
+        _combatLine = (-1 * FieldMax) + FieldOffset;
+
+        int idx = 0;
+        while (Managers.Game.GetEnemyId(idx) > 0)
+        {
+            string name = ConstValue.Enemy + Managers.Game.GetEnemyId(idx);
+            Managers.Resc.Instantiate(name, _enemyField, (op) => {
+                _enemies.Add(op.GetComponent<Image>());
+                OnEnemyLoadComplete();
+            });
+            idx++;
+        }
+    }
+
+    void OnEnemyLoadComplete()
+    {
+        _loadCount--;
+        if (_loadCount > 0)
+            return;
+
+        for (int i = 0; i < _enemies.Count; i++)
+            Debug.Log(_enemies[i].gameObject.name);
+
+        Vector2 offset = Vector2.right * FieldMax; 
+        for (int i = 0; i < _enemies.Count; i++)
+        {
+            _enemies[i].rectTransform.anchoredPosition += offset;
+            offset += Vector2.right * FieldMax;
+        }
+        curState = State.Moving;
+    }
+
+    void RemoveField()
+    {
+        if (_enemies.Count == 0)
+            return;
+        
+        for (int i = 0; i < _enemies.Count; i++)
+        {
+            Managers.Resc.Release(_enemies[i].gameObject.name);
+            Managers.Resc.Destroy(_enemies[i].gameObject);
+        }
+        _enemies.Clear();
+    }
+
     IEnumerator Idle()
     {
         while(true)
         {
-            if (_onCombat)
+            if (curState == State.OnCombat)
             {
                 yield return null;
                 continue;
@@ -178,65 +268,61 @@ public class UI_MainPopUp : UI_PopUp
         }
     }
 
+    Vector2 _moveOffset = Vector2.left * MoveSpeed;
     void Move()
     {
+        // 필드 순서 반전
         if (_back.rectTransform.anchoredPosition.x <= 0)
-        {
-            // 필드 순서 반전 및 몹 설정
             ReverseField();
-            SpawnEnemy();
 
-            // 전투 진입
-            _onCombat = true;
+        _front.rectTransform.anchoredPosition += _moveOffset;
+        _back.rectTransform.anchoredPosition += _moveOffset;
+        if (curState != State.StageChange)
+            _enemyField.anchoredPosition += _moveOffset;
+        
+        // 전투 진입
+        if (_enemyField.anchoredPosition.x <= _combatLine)
+        {
+            curState = State.OnCombat;
             _playerAnimator.SetBool(AnimVar.OnCombat.ToString(), true);
             _hpBarBg.gameObject.SetActive(true);
             _hpBar.rectTransform.localScale = Vector2.one;
-            return;
-        }
 
-        _front.rectTransform.anchoredPosition += Vector2.left * MoveSpeed;
-        _back.rectTransform.anchoredPosition += Vector2.left * MoveSpeed;
+            _combatLine -= FieldMax;
+        }
     }
 
+    // 필드 순서 반전
     void ReverseField()
     {
         _front.rectTransform.anchoredPosition = _back.rectTransform.anchoredPosition + (Vector2.right * FieldMax);
         Image temp = _front;
         _front = _back;
         _back = temp;
-
-        temp = _frontEnemy;
-        _frontEnemy = _backEnemy;
-        _backEnemy = temp;
-        _backEnemy.gameObject.SetActive(true);
     }
 
-    void SpawnEnemy()
-    {
-        int id = Managers.Game.GetNextEnemyId();
-        if (id < 0)
-        {
-            OnNextStage();
-            return;
-        }
-            
-        string name = ConstValue.Enemy + id;
-        Managers.Resc.Load<Sprite>(name, (op) => { _backEnemy.sprite = op; });
-    }
-
+    int _curDelay;
     IEnumerator Combat()
     {
+        _curDelay = ConstValue.MaxAttackDelay;
         while (true)
         {
-            if (_onCombat == false)
+            if (curState != State.OnCombat)
             {
                 yield return null;
                 continue;
             }
 
-            Attack();
-            // ToDo: 공격속도 반영하도록 수정
-            yield return new WaitForSeconds(1.0f);
+            if(_curDelay >= ConstValue.MaxAttackDelay)
+            {
+                _curDelay = 0;
+                Attack();
+            }
+            else
+            {
+                _curDelay += Managers.Game.GetAttackDelay();
+            }
+            yield return null;
         }
     }
 
@@ -261,27 +347,42 @@ public class UI_MainPopUp : UI_PopUp
 
     void OnEnemyDie()
     {
-        _onCombat = false;
+        curState = State.Moving;
         _playerAnimator.SetBool(AnimVar.OnCombat.ToString(), false);
         _hpBarBg.gameObject.SetActive(false);
+        _curDelay = ConstValue.MaxAttackDelay; // 공격딜레이 초기화
         DrawEnemyDead();
 
         if (Managers.Game.OnEnemyDie())
-            UpdateStageText();
+            StartCoroutine(OnNextStage());
+            
         UpdateGoldGem();
     }
 
+    // 적 처치 시 스프라이트 세팅
     void DrawEnemyDead()
     {
-        // 적 처치 시 스프라이트 세팅
-        name = ConstValue.EnemyDie + Managers.Game.GetCurEnemyId();
-        Managers.Resc.Load<Sprite>(name, (op) => { _frontEnemy.sprite = op; });
+        int idx = Managers.Game.CurEnemyCount;
+        name = ConstValue.Sprite_EnemyDie + Managers.Game.GetCurEnemyId(); 
+        Managers.Resc.Load<Sprite>(name, (op) => { _enemies[idx].sprite = op; });
     }
 
-    void OnNextStage()
+    IEnumerator OnNextStage()
     {
-        // ToDo: 스테이지 이동 연출
+        UpdateStageText();
+        curState = State.StageChange;
+        _blackScene.gameObject.SetActive(true);
+        _hpBarBg.gameObject.SetActive(false);
+        _playerAnimator.SetTrigger(AnimVar.DoNextStage.ToString());
+        yield return Managers.Wfs.GetWaitForSeconds(ConstValue.StageChangeTime / 2);
 
+        RemoveField();
+        yield return Managers.Wfs.GetWaitForSeconds(ConstValue.StageChangeTime / 2);
+
+        _blackScene.gameObject.SetActive(false);
+        _enemyField.anchoredPosition = Vector2.left * FieldOffset;
+        curState = State.Moving;
+        InitStage();
     }
     #endregion
 
@@ -304,6 +405,21 @@ public class UI_MainPopUp : UI_PopUp
         }
         stage += stageIdx;
         _stageText.text = STAGE + floor + " - " + stage;
+    }
+
+    const string Menu_Normal = "Sprite_Menu_Normal";
+    const string Menu_Selected = "Sprite_Menu_Selected";
+    void UpdateMenuButtons()
+    {
+        string enhanceKey = curMenu == Menus.Enhance ? Menu_Selected : Menu_Normal;
+        string weaponKey = curMenu == Menus.Weapon ? Menu_Selected : Menu_Normal;
+        string treasureKey = curMenu == Menus.Treasure ? Menu_Selected : Menu_Normal;
+        string shopKey = curMenu == Menus.Shop ? Menu_Selected : Menu_Normal;
+
+        Managers.Resc.Load<Sprite>(enhanceKey, (op) => { _enhanceBtn.sprite = op; });
+        Managers.Resc.Load<Sprite>(weaponKey, (op) => { _weaponBtn.sprite = op; });
+        Managers.Resc.Load<Sprite>(treasureKey, (op) => { _treasureBtn.sprite = op; });
+        Managers.Resc.Load<Sprite>(shopKey, (op) => { _shopBtn.sprite = op; });
     }
     #endregion
 

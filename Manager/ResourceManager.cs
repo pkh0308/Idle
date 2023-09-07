@@ -101,6 +101,12 @@ public class ResourceManager
         _handles.Remove(key);
     }
 
+    public void Destroy(GameObject go)
+    {
+        Object.Destroy(go);
+        Addressables.ReleaseInstance(go);
+    }
+
     public void Clear()
     {
         _resources.Clear();

@@ -50,6 +50,7 @@ public class UI_NewStartPopUp : UI_PopUp
         }
 
         Managers.Game.StartNewGame(idText.text);
+        Managers.UI.ClosePopUp(this);
     }
 
     public void Btn_OnClickExit()

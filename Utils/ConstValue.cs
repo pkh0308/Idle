@@ -5,7 +5,7 @@ public class ConstValue
     public const string EventSystem = "EventSystem";
     public const string Max = "Max";
     public const string Enemy = "Enemy_";
-    public const string EnemyDie = "EnemyDie_";
+    public const string Sprite_EnemyDie = "Sprite_EnemyDie_";
 
     // notice
     public const string Notice_LessThan2 = "닉네임은 2자 이상이어야 합니다.";
@@ -13,8 +13,13 @@ public class ConstValue
     public const string Notice_NoSaveData = "저장된 데이터가 없습니다.";
     public const string Notice_NotEnoughMoney = "재화가 부족합니다.";
 
+    public const float StageChangeTime = 2.0f;
+
     public const int NumOfEnhances = 5;
     public const int NumOfTreasures = 5;
+    public const int NumOfEnemies = 5;
+    public const int MaxFrame = 60;
+    public const int MaxAttackDelay = 6000;
 
     #region 열거형
     public enum GameDataVal
@@ -33,7 +38,10 @@ public class ConstValue
         NickName,
         CurGold,
         CurGem,
-        StageIdx
+        StageIdx,
+        LastAccessYear,
+        LastAccessDayOfYear,
+        LastAccessMinutes
     }
     public enum StageDataVal
     {

@@ -23,6 +23,10 @@ public class GameData
     public readonly int CurGold;
     public readonly int CurGem;
     public readonly int StageIdx;
+    // 마지막 접속
+    public readonly int LastAccessYear;
+    public readonly int LastAccessDayOfYear;
+    public readonly int LastAccessMinutes;
 
     // 이름 저장용
     string[] strValues;
@@ -49,12 +53,17 @@ public class GameData
         CurGem = 0;
         StageIdx = 0;
 
+        LastAccessYear = -1;
+        LastAccessDayOfYear = -1;
+        LastAccessMinutes = -1;
+
         SaveStringValues();
     }
 
     public GameData(int atkPowLv, int atkSpdLv, int critChanceLv, int critDmgLv, int goldUpLv, int weaponLv,
                     int tr_atkPowLv, int tr_atkSpdLv, int tr_critChanceLv, int tr_critDmgLv, int tr_goldUpLv,
-                    string nickname, int curGold, int curGem, int stageIdx)
+                    string nickname, int curGold, int curGem, int stageIdx,
+                    int lastYear, int lastDayOfYear, int lastMinutes)
     {
         AtkPowLv = atkPowLv;
         AtkSpdLv = atkSpdLv;
@@ -75,9 +84,15 @@ public class GameData
         CurGem = curGem;
         StageIdx = stageIdx;
 
+        LastAccessYear = lastYear;
+        LastAccessDayOfYear = lastDayOfYear;
+        LastAccessMinutes = lastMinutes;
+
         SaveStringValues();
     }
+    #endregion
 
+    #region 문자열 값 저장 / 반환
     void SaveStringValues()
     {
         strValues = new string[Enum.GetNames(typeof(ConstValue.GameDataVal)).Length];
@@ -100,8 +115,11 @@ public class GameData
         strValues[(int)ConstValue.GameDataVal.CurGold] = CurGold.ToString();
         strValues[(int)ConstValue.GameDataVal.CurGem] = CurGem.ToString();
         strValues[(int)ConstValue.GameDataVal.StageIdx] = StageIdx.ToString();
+        // 접속 시간
+        strValues[(int)ConstValue.GameDataVal.LastAccessYear] = LastAccessYear.ToString();
+        strValues[(int)ConstValue.GameDataVal.LastAccessDayOfYear] = LastAccessDayOfYear.ToString();
+        strValues[(int)ConstValue.GameDataVal.LastAccessMinutes] = LastAccessMinutes.ToString();
     }
-    #endregion
 
     public string GetStringValue(int idx)
     {
@@ -113,4 +131,5 @@ public class GameData
 
         return strValues[idx];
     }
+    #endregion
 }

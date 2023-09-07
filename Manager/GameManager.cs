@@ -1,7 +1,10 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+
+using Random = UnityEngine.Random;
 
 public class GameManager
 {
@@ -43,6 +46,10 @@ public class GameManager
     public int CurGem { get; private set; }
     public int CurStageIdx { get; private set; }
 
+    public int LastAccessYear { get; private set; }
+    public int LastAccessDayOfYear { get; private set; }
+    public int LastAccessMinutes { get; private set; }
+
     void GetGameDataFromDataManager()
     {
         GameData data = Managers.Data.CurGameData;
@@ -65,6 +72,10 @@ public class GameManager
         CurGold = data.CurGold;
         CurGem = data.CurGem;
         CurStageIdx = data.StageIdx;
+
+        LastAccessYear = data.LastAccessYear;
+        LastAccessDayOfYear = data.LastAccessDayOfYear;
+        LastAccessMinutes = data.LastAccessMinutes;
     }
 
     public void UpdateGameData()
@@ -72,9 +83,13 @@ public class GameManager
         if (curState == GameState.Title)
             return;
 
+        LastAccessYear = DateTime.Now.Year;
+        LastAccessDayOfYear = DateTime.Now.DayOfYear;
+        LastAccessMinutes = DateTime.Now.Hour * 60 + DateTime.Now.Minute;
+
         GameData data = new GameData(AtkPowerLv, AtkSpeedLv, CritChanceLv, CritDamageLv, GoldUpLv, WeaponLv,
                                      Tr_AtkPowerLv, Tr_AtkSpeedLv, Tr_CritChanceLv, Tr_CritDamageLv, Tr_GoldUpLv,
-                                     NickName, CurGold, CurGem, CurStageIdx);
+                                     NickName, CurGold, CurGem, CurStageIdx, LastAccessYear, LastAccessDayOfYear, LastAccessMinutes);
         Managers.Data.SetGameData(data);
     }
     #endregion
@@ -85,7 +100,6 @@ public class GameManager
         Managers.Data.CreateNewGameData(nickname);
         GetGameDataFromDataManager();
         curState = GameState.Main;
-        InitStage();
         UpdatePlayer();
         SceneManager.LoadScene(Scenes.MainScene.ToString());
     }
@@ -97,15 +111,25 @@ public class GameManager
 
         GetGameDataFromDataManager();
         curState = GameState.Main;
-        InitStage();
         UpdatePlayer();
         SceneManager.LoadScene(Scenes.MainScene.ToString());
         return true;
     }
+
+    public void BackToTitle()
+    {
+        UpdateGameData();
+        Managers.Data.SaveGameData();
+        SceneManager.LoadScene(Scenes.TitleScene.ToString());
+    }
     #endregion
 
     #region 재화 획득 & 소모
-    public bool Purchase(ConstValue.Goods type, int value)
+    Action _goleGemUpdate = null;
+    public void SetCallBackForGoods(Action callback) { _goleGemUpdate = callback; }
+    void UpdateGoldGem() { _goleGemUpdate?.Invoke(); }
+
+    bool Purchase(ConstValue.Goods type, int value)
     {
         int temp = 0;
         if(type == ConstValue.Goods.Gold)
@@ -122,13 +146,22 @@ public class GameManager
         else if (type == ConstValue.Goods.Gem)
             CurGem = temp;
 
+        UpdateGoldGem();
         return true;
     }
 
-    public int GetGold(int value) { CurGold += value; return CurGold; }
-    public int GetGem(int value) { CurGem += value; return CurGem; }
-
-    
+    public int GetGold(int value) 
+    { 
+        CurGold += value;
+        UpdateGoldGem();
+        return CurGold; 
+    }
+    public int GetGem(int value) 
+    { 
+        CurGem += value; 
+        UpdateGoldGem(); 
+        return CurGem; 
+    }
     #endregion
 
     #region 전투
@@ -141,8 +174,6 @@ public class GameManager
 
     public int EnemyHp { get; private set; }
     public int MaxEnemyHp { get; private set; }
-    int _curEnemyCount;
-    int _maxEnemyCount;
 
     public void UpdatePlayer()
     {
@@ -153,18 +184,23 @@ public class GameManager
         _goldUp = Managers.Data.GetEnahnceValue((int)ConstValue.Enhances.GoldUp, GoldUpLv);
     }
 
+    public int CurEnemyCount { get; private set; }
+    public int MaxEnemyCount { get; private set; }
     int[] _enemyIds;
     public void InitStage()
     {
         _stageData = Managers.Data.GetStageData(CurStageIdx);
         MaxEnemyHp = _stageData.Hp;
         EnemyHp = MaxEnemyHp;
-        _maxEnemyCount = _stageData.EnemyCount;
-        _curEnemyCount = 0;
+        MaxEnemyCount = _stageData.EnemyCount;
+        CurEnemyCount = 0;
 
         _enemyIds = new int[_stageData.EnemyCount];
         for(int i = 0; i < _enemyIds.Length; i++)
             _enemyIds[i] = Random.Range(_stageData.MinEnemyId, _stageData.MaxEnemyId + 1);
+
+        for (int i = 0; i < _enemyIds.Length; i++)
+            Debug.Log(_enemyIds[i]);
     }
 
     public void Attack()
@@ -173,7 +209,7 @@ public class GameManager
         bool critical = Random.Range(0, 10000) < _critChance + wData.CritChance;
         int dmg = _atkPow + wData.AtkPower;
         if(critical) 
-            dmg = (int)(dmg * (_critDmg + wData.CritDamage / 10000.0f));
+            dmg = Convert.ToInt32(dmg * ((_critDmg + wData.CritDamage) / 10000.0f));
 
         EnemyHp -= dmg;
     }
@@ -184,21 +220,29 @@ public class GameManager
         GetGemFromEnemy();
         EnemyHp = MaxEnemyHp;
 
-        _curEnemyCount++;
-        if(_curEnemyCount == _maxEnemyCount)
+        CurEnemyCount++;
+        if(CurEnemyCount == MaxEnemyCount)
         {
             CurStageIdx++;
-            InitStage();
             return true;
         }
         return false;
     }
 
+    public int GetAttackDelay()
+    {
+        int tr_atkSpeed = Managers.Data.GetTreasureValue((int)ConstValue.Treasures.Tr_AtkPow, Tr_AtkSpeedLv);
+        return Convert.ToInt32(_atkSpd * (1 + (tr_atkSpeed / 10000.0f)));
+    }
+
     public void GetGoldFromEnemy() { CurGold += (int)(_stageData.DropGold * (_goldUp / 10000.0f)); }
     public void GetGemFromEnemy() { CurGem += _stageData.DropGem; }
 
-    public int GetCurEnemyId() { return _enemyIds[_curEnemyCount]; }
-    public int GetNextEnemyId() { return _curEnemyCount + 1 < _maxEnemyCount ? _enemyIds[_curEnemyCount + 1] : -1; }
+    // 오프라인 보상(1분당)
+    public int GetRewardPerMinute() { return _stageData.DropGold; }
+
+    public int GetEnemyId(int idx) { return idx < MaxEnemyCount ? _enemyIds[idx] : -1; }
+    public int GetCurEnemyId() { return _enemyIds[CurEnemyCount]; }
     #endregion
 
     #region 강화

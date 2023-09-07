@@ -27,6 +27,8 @@ public class UIManager
     {
         if (name == null)
             name = typeof(T).Name;
+        if (parent == null)
+            parent = _baseTransform;
         
         Managers.Resc.Instantiate(name, parent, (op) => {
             op.transform.SetParent(parent);

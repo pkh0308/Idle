@@ -1,0 +1,23 @@
+using System.Collections.Generic;
+using UnityEngine;
+
+// WaitForSeconds 관리용 클래스
+// 해당 클래스를 통해 이미 생성한 WaitForSeconds 객체 반환
+// 아직 존재하지 않는 시간의 WaitForSeconds만 객체 새로 생성
+public class WfsManager
+{
+    Dictionary<float, WaitForSeconds> secondsDic = new Dictionary<float, WaitForSeconds>();
+
+    public void Init() { }
+
+    public WaitForSeconds GetWaitForSeconds(float time)
+    {
+        // 해당 시간의 WaitForSeconds가 있을 경우
+        if (secondsDic.TryGetValue(time, out WaitForSeconds value))
+            return value;
+
+        // 없을 경우
+        secondsDic.Add(time, new WaitForSeconds(time));
+        return secondsDic[time];
+    }
+}
