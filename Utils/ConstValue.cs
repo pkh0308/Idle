@@ -12,12 +12,14 @@ public class ConstValue
     public const string Notice_NoBlankInName = "닉네임은 공백을 포함할 수 없습니다.";
     public const string Notice_NoSaveData = "저장된 데이터가 없습니다.";
     public const string Notice_NotEnoughMoney = "재화가 부족합니다.";
+    public const string Notice_AdReward = "광고 보상을 획득했습니다.";
+    public const string Notice_AdNotPrepared = "광고 준비중입니다.\n잠시만 기다려주세요.";
+    public const string Notice_AdCountOver = "시청 횟수를 모두 소진하였습니다.";
 
     public const float StageChangeTime = 2.0f;
 
     public const int NumOfEnhances = 5;
     public const int NumOfTreasures = 5;
-    public const int NumOfEnemies = 5;
     public const int MaxFrame = 60;
     public const int MaxAttackDelay = 6000;
 
@@ -41,7 +43,9 @@ public class ConstValue
         StageIdx,
         LastAccessYear,
         LastAccessDayOfYear,
-        LastAccessMinutes
+        LastAccessMinutes,
+        AdCount_Gold_2hr,
+        AdCount_Gem_100
     }
     public enum StageDataVal
     {
@@ -111,6 +115,11 @@ public class ConstValue
         Tr_GoldUp
     }
 
+    public enum Ads
+    {
+        Gold_2hr,
+        Gem_100
+    }
 
     public enum Goods
     {

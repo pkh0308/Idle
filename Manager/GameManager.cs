@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -50,32 +48,39 @@ public class GameManager
     public int LastAccessDayOfYear { get; private set; }
     public int LastAccessMinutes { get; private set; }
 
+    public int AdCount_Gold_2hr { get; private set; }
+    public int AdCount_Gem_100 { get; private set; }
+
     void GetGameDataFromDataManager()
     {
         GameData data = Managers.Data.CurGameData;
-
+        // 강화 레벨
         AtkPowerLv = data.AtkPowLv;
         AtkSpeedLv = data.AtkSpdLv;
         CritChanceLv = data.CritChanceLv;
         CritDamageLv = data.CritDmgLv;
         GoldUpLv = data.GoldUpLv;
-
+        // 무기 레벨
         WeaponLv = data.WeaponLv;
-
+        // 보물 레벨
         Tr_AtkPowerLv = data.Treasure_AtkPowLv;
         Tr_AtkSpeedLv = data.Treasure_AtkSpdLv;
         Tr_CritChanceLv = data.Treasure_CritChanceLv;
         Tr_CritDamageLv = data.Treasure_CritDmgLv;
         Tr_GoldUpLv = data.Treasure_GoldUpLv;
-
+        // 닉네임, 골드, 보석, 스테이지 인덱스
         NickName = data.NickName;
         CurGold = data.CurGold;
         CurGem = data.CurGem;
         CurStageIdx = data.StageIdx;
-
+        // 마지막 접속 연도, 날짜, 시간(분)
         LastAccessYear = data.LastAccessYear;
         LastAccessDayOfYear = data.LastAccessDayOfYear;
         LastAccessMinutes = data.LastAccessMinutes;
+        // 광고 카운트
+        // 마지막 접속과 같은 날이라면 카운트 유지, 아니라면 초기화
+        AdCount_Gold_2hr = DateTime.Now.DayOfYear == LastAccessDayOfYear ? data.AdCount_Gold_2hr : 0;
+        AdCount_Gem_100 = DateTime.Now.DayOfYear == LastAccessDayOfYear ? data.AdCount_Gem_100 : 0;
     }
 
     public void UpdateGameData()
@@ -83,13 +88,18 @@ public class GameManager
         if (curState == GameState.Title)
             return;
 
+        // 마지막 접속과 같은 날이라면 카운트 유지, 아니라면 초기화
+        AdCount_Gold_2hr = DateTime.Now.DayOfYear == LastAccessDayOfYear ? AdCount_Gold_2hr : 0;
+        AdCount_Gem_100 = DateTime.Now.DayOfYear == LastAccessDayOfYear ? AdCount_Gem_100 : 0;
+        // 날짜 및 시간 갱신
         LastAccessYear = DateTime.Now.Year;
         LastAccessDayOfYear = DateTime.Now.DayOfYear;
         LastAccessMinutes = DateTime.Now.Hour * 60 + DateTime.Now.Minute;
 
         GameData data = new GameData(AtkPowerLv, AtkSpeedLv, CritChanceLv, CritDamageLv, GoldUpLv, WeaponLv,
                                      Tr_AtkPowerLv, Tr_AtkSpeedLv, Tr_CritChanceLv, Tr_CritDamageLv, Tr_GoldUpLv,
-                                     NickName, CurGold, CurGem, CurStageIdx, LastAccessYear, LastAccessDayOfYear, LastAccessMinutes);
+                                     NickName, CurGold, CurGem, CurStageIdx, LastAccessYear, LastAccessDayOfYear, LastAccessMinutes, 
+                                     AdCount_Gold_2hr, AdCount_Gem_100);
         Managers.Data.SetGameData(data);
     }
     #endregion
@@ -162,6 +172,10 @@ public class GameManager
         UpdateGoldGem(); 
         return CurGem; 
     }
+
+    // 오프라인 보상(1분당)
+    public int GetRewardPerMinute() { return _stageData.DropGold; }
+    public void GetGoldPerHour(int hour) { GetGold(_stageData.DropGold * 60 * hour); }
     #endregion
 
     #region 전투
@@ -198,9 +212,6 @@ public class GameManager
         _enemyIds = new int[_stageData.EnemyCount];
         for(int i = 0; i < _enemyIds.Length; i++)
             _enemyIds[i] = Random.Range(_stageData.MinEnemyId, _stageData.MaxEnemyId + 1);
-
-        for (int i = 0; i < _enemyIds.Length; i++)
-            Debug.Log(_enemyIds[i]);
     }
 
     public void Attack()
@@ -237,9 +248,6 @@ public class GameManager
 
     public void GetGoldFromEnemy() { CurGold += (int)(_stageData.DropGold * (_goldUp / 10000.0f)); }
     public void GetGemFromEnemy() { CurGem += _stageData.DropGem; }
-
-    // 오프라인 보상(1분당)
-    public int GetRewardPerMinute() { return _stageData.DropGold; }
 
     public int GetEnemyId(int idx) { return idx < MaxEnemyCount ? _enemyIds[idx] : -1; }
     public int GetCurEnemyId() { return _enemyIds[CurEnemyCount]; }
@@ -364,6 +372,47 @@ public class GameManager
         }
 
         return true;
+    }
+    #endregion
+
+    #region 광고
+    public int GetAdCount(int idx)
+    {
+        if(LastAccessDayOfYear != DateTime.Now.DayOfYear)
+        {
+            LastAccessDayOfYear = DateTime.Now.DayOfYear;
+            ResetAdCount();
+        }
+
+        switch(idx)
+        {
+            case (int)ConstValue.Ads.Gold_2hr:
+                return AdCount_Gold_2hr;
+            case (int)ConstValue.Ads.Gem_100:
+                return AdCount_Gem_100;
+            default:
+                return -1;
+        }
+    }
+
+    public void PlusAdCount(int idx)
+    {
+        switch (idx)
+        {
+            case (int)ConstValue.Ads.Gold_2hr:
+                AdCount_Gold_2hr++;
+                break;
+            case (int)ConstValue.Ads.Gem_100:
+                AdCount_Gem_100++;
+                break;
+        }
+    }
+
+    // 날짜 넘어간 경우 호출
+    void ResetAdCount()
+    {
+        AdCount_Gold_2hr = 0;
+        AdCount_Gem_100 = 0;
     }
     #endregion
 }

@@ -53,9 +53,28 @@ public class UI_ShopPopUp : UI_PopUp
     }
 
     #region πˆ∆∞
+    // ∞ÒµÂ
+    const int Gold_2Hour = 2;
+    const int Gold_5Hour = 5;
+    // ∫∏ºÆ
+    const int Gem_100 = 100;
+    const int Gem_500 = 500;
+    const int Gem_2500 = 2500;
+
     public void Btn_OnClickGetGold_2hr()
     {
-        Debug.Log("∞ÒµÂ »πµÊ(2Ω√∞£)");
+        if(Managers.Adv.CanShowAd((int)Buttons.GetGoldBtn_2hr, ConstValue.Ads.Gold_2hr) == false)
+        {
+            Managers.UI.OpenNotice(ConstValue.Notice_AdCountOver);
+            return;
+        }
+
+        Managers.Adv.ShowRewardedAds((rwd) =>
+        {
+            Managers.Game.GetGoldPerHour(Gold_2Hour);
+            Managers.UI.OpenNotice(ConstValue.Notice_AdReward);
+            UpdateBtns();
+        });
     }
     public void Btn_OnClickGetGold_5hr()
     {
@@ -63,7 +82,18 @@ public class UI_ShopPopUp : UI_PopUp
     }
     public void Btn_OnClickGetGem_100()
     {
-        Debug.Log("¡™ »πµÊ(100)");
+        if (Managers.Adv.CanShowAd((int)Buttons.GetGemBtn_100, ConstValue.Ads.Gem_100) == false)
+        {
+            Managers.UI.OpenNotice(ConstValue.Notice_AdCountOver);
+            return;
+        }
+
+        Managers.Adv.ShowRewardedAds((rwd) =>
+        {
+            Managers.Game.GetGem(Gem_100);
+            Managers.UI.OpenNotice(ConstValue.Notice_AdReward);
+            UpdateBtns();
+        });
     }
     public void Btn_OnClickGetGem_500()
     {
@@ -84,18 +114,18 @@ public class UI_ShopPopUp : UI_PopUp
         int gem_500 = (int)Buttons.GetGemBtn_500;
         int gem_2500 = (int)Buttons.GetGemBtn_2500;
 
-        _getGoldBtnText_2hr.text = GetCost(Managers.Data.GetShopData(gold_2hr));
+        _getGoldBtnText_2hr.text = GetCost(Managers.Data.GetShopData(gold_2hr), (int)ConstValue.Ads.Gold_2hr);
         _getGoldBtnText_5hr.text = GetCost(Managers.Data.GetShopData(gold_5hr));
-        _getGemBtnText_100.text = GetCost(Managers.Data.GetShopData(gem_100));
+        _getGemBtnText_100.text = GetCost(Managers.Data.GetShopData(gem_100), (int)ConstValue.Ads.Gem_100);
         _getGemBtnText_500.text = GetCost(Managers.Data.GetShopData(gem_500));
         _getGemBtnText_2500.text = GetCost(Managers.Data.GetShopData(gem_2500));
     }
 
-    string GetCost(ShopData data)
+    string GetCost(ShopData data, int adIdx = -1)
     {
-        if(data.MaxCount > 0) // ±§∞Ì ªÛ«∞
-            return $"({0} / {data.MaxCount})";
-        
+        if(adIdx >= 0) // ±§∞Ì ªÛ«∞
+            return $"({Managers.Game.GetAdCount(adIdx)} / {data.MaxCount})";
+            
         return "£‹ " + data.Cost.ToString();
     }
     #endregion

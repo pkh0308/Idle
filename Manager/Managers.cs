@@ -8,6 +8,7 @@ public class Managers : MonoBehaviour
     private static DataManager dataManager = new DataManager();
     private static SoundManager soundManager = new SoundManager();
     private static WfsManager wfsManager = new WfsManager();
+    private static AdvManager advManager = new AdvManager();
 
     public static GameManager Game {  get { return gameManager; } }
     public static UIManager UI { get {  return uiManager; } }
@@ -15,6 +16,7 @@ public class Managers : MonoBehaviour
     public static DataManager Data { get { return dataManager; } }
     public static SoundManager Sound { get { return soundManager; } }
     public static WfsManager Wfs { get { return wfsManager; } }
+    public static AdvManager Adv { get { return advManager; } }
 
     bool _initialized;
     void Start()
@@ -31,6 +33,7 @@ public class Managers : MonoBehaviour
         dataManager.Init();
         soundManager.Init();
         wfsManager.Init();
+        advManager.Init();
 
         // 프레임 제한
         Application.targetFrameRate = ConstValue.MaxFrame;

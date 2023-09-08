@@ -74,10 +74,14 @@ public class DataManager
             int lastDayOfYear = Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.LastAccessDayOfYear.ToString()));
             int lastMins = Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.LastAccessMinutes.ToString()));
 
+            int adCnt_Gold_2hr = Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.AdCount_Gold_2hr.ToString()));
+            int adCnt_Gem_100 = Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.AdCount_Gem_100.ToString()));
+
             //가져온 데이터 저장
             GameData data = new GameData(atkPowLv, atkSpeedLv, critChanceLv, critDmgLv, goldUpLv, weaponLv,
                                          tr_atkPowLv, tr_atkSpeedLv, tr_critChanceLv, tr_critDmgLv, tr_goldUpLv, 
-                                         nickname, curGold, curGem, stageIdx, lastYear, lastDayOfYear, lastMins);
+                                         nickname, curGold, curGem, stageIdx, lastYear, lastDayOfYear, lastMins,
+                                         adCnt_Gold_2hr, adCnt_Gem_100);
             CurGameData = data;
         }
     }

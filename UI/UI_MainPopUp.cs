@@ -198,7 +198,7 @@ public class UI_MainPopUp : UI_PopUp
     #endregion
 
     #region 전투 
-    List<Image> _enemies = new List<Image>(ConstValue.NumOfEnemies);
+    Image[] _enemies;
     int _loadCount = 0;
     int _combatLine = 0;
 
@@ -207,6 +207,7 @@ public class UI_MainPopUp : UI_PopUp
         // 데이터 갱신
         Managers.Game.InitStage();
 
+        _enemies = new Image[Managers.Game.MaxEnemyCount];
         _loadCount = Managers.Game.MaxEnemyCount;
         _combatLine = (-1 * FieldMax) + FieldOffset;
 
@@ -214,8 +215,8 @@ public class UI_MainPopUp : UI_PopUp
         while (Managers.Game.GetEnemyId(idx) > 0)
         {
             string name = ConstValue.Enemy + Managers.Game.GetEnemyId(idx);
-            Managers.Resc.Instantiate(name, _enemyField, (op) => {
-                _enemies.Add(op.GetComponent<Image>());
+            Managers.Resc.InstantiateByIdx(name, idx, _enemyField, (op, idx) => {
+                _enemies[idx] = op.GetComponent<Image>();
                 OnEnemyLoadComplete();
             });
             idx++;
@@ -228,11 +229,8 @@ public class UI_MainPopUp : UI_PopUp
         if (_loadCount > 0)
             return;
 
-        for (int i = 0; i < _enemies.Count; i++)
-            Debug.Log(_enemies[i].gameObject.name);
-
         Vector2 offset = Vector2.right * FieldMax; 
-        for (int i = 0; i < _enemies.Count; i++)
+        for (int i = 0; i < _enemies.Length; i++)
         {
             _enemies[i].rectTransform.anchoredPosition += offset;
             offset += Vector2.right * FieldMax;
@@ -242,15 +240,11 @@ public class UI_MainPopUp : UI_PopUp
 
     void RemoveField()
     {
-        if (_enemies.Count == 0)
-            return;
-        
-        for (int i = 0; i < _enemies.Count; i++)
+        for (int i = 0; i < _enemies.Length; i++)
         {
             Managers.Resc.Release(_enemies[i].gameObject.name);
             Managers.Resc.Destroy(_enemies[i].gameObject);
         }
-        _enemies.Clear();
     }
 
     IEnumerator Idle()
@@ -277,11 +271,10 @@ public class UI_MainPopUp : UI_PopUp
 
         _front.rectTransform.anchoredPosition += _moveOffset;
         _back.rectTransform.anchoredPosition += _moveOffset;
-        if (curState != State.StageChange)
-            _enemyField.anchoredPosition += _moveOffset;
+        _enemyField.anchoredPosition += _moveOffset;
         
         // 전투 진입
-        if (_enemyField.anchoredPosition.x <= _combatLine)
+        if (curState != State.StageChange && _enemyField.anchoredPosition.x <= _combatLine)
         {
             curState = State.OnCombat;
             _playerAnimator.SetBool(AnimVar.OnCombat.ToString(), true);
