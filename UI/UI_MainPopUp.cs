@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -16,12 +15,14 @@ public class UI_MainPopUp : UI_PopUp
         TreasureBtnText,
         ShopBtnText,
         GoldText,
-        GemText
+        GemText,
+        BossTryBtnText
     }
     TextMeshProUGUI _nicknameText;
     TextMeshProUGUI _stageText;
     TextMeshProUGUI _goldText;
     TextMeshProUGUI _gemText;
+    TextMeshProUGUI[] _dmgTexts;
     const string STAGE = "Stage ";
 
     enum Buttons
@@ -30,7 +31,8 @@ public class UI_MainPopUp : UI_PopUp
         WeaponBtn,
         TreasureBtn,
         ShopBtn,
-        SettingsBtn
+        SettingsBtn,
+        BossTryBtn
     }
     enum Images
     {
@@ -102,6 +104,7 @@ public class UI_MainPopUp : UI_PopUp
         Custom.GetOrAddComponent<UI_Base>(GetButton((int)Buttons.TreasureBtn).gameObject).BindEvent(Btn_OnClickTreasure);
         Custom.GetOrAddComponent<UI_Base>(GetButton((int)Buttons.ShopBtn).gameObject).BindEvent(Btn_OnClickShop);
         Custom.GetOrAddComponent<UI_Base>(GetButton((int)Buttons.SettingsBtn).gameObject).BindEvent(Btn_OnClickSettings);
+        Custom.GetOrAddComponent<UI_Base>(GetButton((int)Buttons.BossTryBtn).gameObject).BindEvent(Btn_OnClickBossTry);
 
         _nicknameText = GetText((int)Texts.NickNameText);
         _nicknameText.text = Managers.Game.NickName;
@@ -133,6 +136,7 @@ public class UI_MainPopUp : UI_PopUp
         curState = State.Moving;
 
         // UI 초기화
+        TextPooling();
         UpdateGoldGem();
         UpdateStageText();
         InitialSetActiveFalse();
@@ -150,6 +154,19 @@ public class UI_MainPopUp : UI_PopUp
     void InitialSetActiveFalse()
     { 
         _hpBarBg.gameObject.SetActive(false);
+    }
+
+    void TextPooling()
+    {
+        _dmgTexts = new TextMeshProUGUI[100];
+        for (int i = 0; i < _dmgTexts.Length; i++)
+        {
+            Managers.Resc.InstantiateByIdx(ConstValue.DmgText, i, transform, (op, idx) =>
+            {
+                _dmgTexts[idx] = op.GetComponent<TextMeshProUGUI>();
+                op.SetActive(false);
+            });
+        }
     }
     #endregion
 
@@ -194,6 +211,11 @@ public class UI_MainPopUp : UI_PopUp
     public void Btn_OnClickSettings()
     {
         Managers.UI.OpenPopUp<UI_SettingsPopUp>();
+    }
+
+    public void Btn_OnClickBossTry()
+    {
+        Managers.UI.OpenPopUp<UI_BossTryPopUp>();
     }
     #endregion
 
@@ -324,7 +346,8 @@ public class UI_MainPopUp : UI_PopUp
     {
         _playerAnimator.SetTrigger(AnimVar.DoAttack.ToString());
         Managers.Sound.PlaySfx(SoundManager.Sfxs.Sound_Attack, 2.0f);
-        Managers.Game.Attack();
+        int dmg = Managers.Game.Attack(out bool critical);
+        ShowDmgText(dmg, critical);
 
         // 체력바 갱신
         float hpRate = (float)Managers.Game.EnemyHp / Managers.Game.MaxEnemyHp;
@@ -413,6 +436,24 @@ public class UI_MainPopUp : UI_PopUp
         Managers.Resc.Load<Sprite>(weaponKey, (op) => { _weaponBtn.sprite = op; });
         Managers.Resc.Load<Sprite>(treasureKey, (op) => { _treasureBtn.sprite = op; });
         Managers.Resc.Load<Sprite>(shopKey, (op) => { _shopBtn.sprite = op; });
+    }
+
+    void ShowDmgText(int value, bool critical)
+    {
+        TextMeshProUGUI dmgText = null;
+        // 비활성 상태인 텍스트 찾기
+        for (int i = 0; i < _dmgTexts.Length; i++)
+        {
+            if (_dmgTexts[i].gameObject.activeSelf)
+                continue;
+
+            dmgText = _dmgTexts[i];
+            break;
+        }
+
+        dmgText.color = critical ? Color.yellow : Color.white;
+        dmgText.text = Custom.CalUnit(value);
+        dmgText.gameObject.SetActive(true);
     }
     #endregion
 

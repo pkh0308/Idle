@@ -30,6 +30,8 @@ public class GameData
     // 광고 카운트
     public readonly int AdCount_Gold_2hr;
     public readonly int AdCount_Gem_100;
+    // 보스 레벨
+    public readonly int BossLv;
 
     // 이름 저장용
     string[] strValues;
@@ -63,13 +65,15 @@ public class GameData
         AdCount_Gold_2hr = 0;
         AdCount_Gem_100 = 0;
 
+        BossLv = 0;
+
         SaveStringValues();
     }
 
     public GameData(int atkPowLv, int atkSpdLv, int critChanceLv, int critDmgLv, int goldUpLv, int weaponLv,
                     int tr_atkPowLv, int tr_atkSpdLv, int tr_critChanceLv, int tr_critDmgLv, int tr_goldUpLv,
                     string nickname, int curGold, int curGem, int stageIdx,
-                    int lastYear, int lastDayOfYear, int lastMinutes, int adCount_gold2hr, int adCount_gem100)
+                    int lastYear, int lastDayOfYear, int lastMinutes, int adCount_gold2hr, int adCount_gem100, int bossLv)
     {
         AtkPowLv = atkPowLv;
         AtkSpdLv = atkSpdLv;
@@ -96,6 +100,8 @@ public class GameData
 
         AdCount_Gold_2hr = adCount_gold2hr;
         AdCount_Gem_100 = adCount_gem100;
+
+        BossLv = bossLv;
 
         SaveStringValues();
     }
@@ -131,6 +137,8 @@ public class GameData
         // 광고 카운트
         strValues[(int)ConstValue.GameDataVal.AdCount_Gold_2hr] = AdCount_Gold_2hr.ToString();
         strValues[(int)ConstValue.GameDataVal.AdCount_Gem_100] = AdCount_Gem_100.ToString();
+        // 보스 레벨
+        strValues[(int)ConstValue.GameDataVal.BossLv] = BossLv.ToString();
     }
 
     public string GetStringValue(int idx)

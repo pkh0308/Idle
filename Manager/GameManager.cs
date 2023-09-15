@@ -9,14 +9,16 @@ public class GameManager
     enum GameState
     {
         Title,
-        Main
+        Main, 
+        Boss
     }
     GameState curState;
 
     enum Scenes
     {
         TitleScene,
-        MainScene
+        MainScene,
+        BossScene
     }
 
     public void Init()
@@ -51,6 +53,8 @@ public class GameManager
     public int AdCount_Gold_2hr { get; private set; }
     public int AdCount_Gem_100 { get; private set; }
 
+    public int BossLv { get; private set; }
+
     void GetGameDataFromDataManager()
     {
         GameData data = Managers.Data.CurGameData;
@@ -81,6 +85,8 @@ public class GameManager
         // 마지막 접속과 같은 날이라면 카운트 유지, 아니라면 초기화
         AdCount_Gold_2hr = DateTime.Now.DayOfYear == LastAccessDayOfYear ? data.AdCount_Gold_2hr : 0;
         AdCount_Gem_100 = DateTime.Now.DayOfYear == LastAccessDayOfYear ? data.AdCount_Gem_100 : 0;
+        // 보스 레벨
+        BossLv = data.BossLv;
     }
 
     public void UpdateGameData()
@@ -99,7 +105,7 @@ public class GameManager
         GameData data = new GameData(AtkPowerLv, AtkSpeedLv, CritChanceLv, CritDamageLv, GoldUpLv, WeaponLv,
                                      Tr_AtkPowerLv, Tr_AtkSpeedLv, Tr_CritChanceLv, Tr_CritDamageLv, Tr_GoldUpLv,
                                      NickName, CurGold, CurGem, CurStageIdx, LastAccessYear, LastAccessDayOfYear, LastAccessMinutes, 
-                                     AdCount_Gold_2hr, AdCount_Gem_100);
+                                     AdCount_Gold_2hr, AdCount_Gem_100, BossLv);
         Managers.Data.SetGameData(data);
     }
     #endregion
@@ -110,7 +116,7 @@ public class GameManager
         Managers.Data.CreateNewGameData(nickname);
         GetGameDataFromDataManager();
         curState = GameState.Main;
-        UpdatePlayer();
+        InitPlayer();
         SceneManager.LoadScene(Scenes.MainScene.ToString());
     }
 
@@ -121,7 +127,7 @@ public class GameManager
 
         GetGameDataFromDataManager();
         curState = GameState.Main;
-        UpdatePlayer();
+        InitPlayer();
         SceneManager.LoadScene(Scenes.MainScene.ToString());
         return true;
     }
@@ -131,6 +137,13 @@ public class GameManager
         UpdateGameData();
         Managers.Data.SaveGameData();
         SceneManager.LoadScene(Scenes.TitleScene.ToString());
+    }
+
+    public void BackToMain()
+    {
+        curState = GameState.Main;
+        InitPlayer();
+        SceneManager.LoadScene(Scenes.MainScene.ToString());
     }
     #endregion
 
@@ -189,7 +202,7 @@ public class GameManager
     public int EnemyHp { get; private set; }
     public int MaxEnemyHp { get; private set; }
 
-    public void UpdatePlayer()
+    public void InitPlayer()
     {
         _atkPow = Managers.Data.GetEnahnceValue((int)ConstValue.Enhances.AtkPow, AtkPowerLv);
         _atkSpd = Managers.Data.GetEnahnceValue((int)ConstValue.Enhances.AtkSpd, AtkSpeedLv);
@@ -214,15 +227,16 @@ public class GameManager
             _enemyIds[i] = Random.Range(_stageData.MinEnemyId, _stageData.MaxEnemyId + 1);
     }
 
-    public void Attack()
+    public int Attack(out bool critical, bool cheerBuffOn = false)
     {
         WeaponData wData = Managers.Data.GetWeaponData(WeaponLv);
-        bool critical = Random.Range(0, 10000) < _critChance + wData.CritChance;
-        int dmg = _atkPow + wData.AtkPower;
+        critical = Random.Range(0, 10000) < _critChance + wData.CritChance;
+        int dmg = cheerBuffOn ? Convert.ToInt32((_atkPow + wData.AtkPower) * ConstValue.CheerUpRate) : _atkPow + wData.AtkPower;
         if(critical) 
             dmg = Convert.ToInt32(dmg * ((_critDmg + wData.CritDamage) / 10000.0f));
 
-        EnemyHp -= dmg;
+        EnemyHp = EnemyHp > dmg ? EnemyHp - dmg : 0;
+        return dmg;
     }
 
     public bool OnEnemyDie()
@@ -413,6 +427,45 @@ public class GameManager
     {
         AdCount_Gold_2hr = 0;
         AdCount_Gem_100 = 0;
+    }
+    #endregion
+
+    #region 보스
+    public BossData CurBossData { get; private set; }
+    public void EnterBossTry(int idx)
+    {
+        CurBossData = Managers.Data.GetBossData(idx);
+        if(CurBossData == null)
+        {
+            Debug.Log($"Wrong boss idx: {idx}");
+            return;
+        }
+
+        curState = GameState.Boss;
+        SceneManager.LoadScene(Scenes.BossScene.ToString());
+    }
+
+    public void InitBoss()
+    {
+        MaxEnemyHp = CurBossData.Hp;
+        EnemyHp = CurBossData.Hp;
+    }
+
+    public void DefeatBoss()
+    {
+        BossLv++;
+        GetGoldAndGemFromBoss();
+    }
+
+    void GetGoldAndGemFromBoss() 
+    {
+        CurGem += CurBossData.DropGem;
+        CurGold += CurBossData.DropGold;
+    }
+
+    public void ExitBossTry()
+    {
+        BackToMain();
     }
     #endregion
 }

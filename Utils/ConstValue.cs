@@ -6,22 +6,28 @@ public class ConstValue
     public const string Max = "Max";
     public const string Enemy = "Enemy_";
     public const string Sprite_EnemyDie = "Sprite_EnemyDie_";
+    public const string Boss = "Boss_";
+    public const string Sprite_BossDie = "Sprite_BossDie_";
+    public const string DmgText = "DamageText";
 
     // notice
     public const string Notice_LessThan2 = "닉네임은 2자 이상이어야 합니다.";
     public const string Notice_NoBlankInName = "닉네임은 공백을 포함할 수 없습니다.";
     public const string Notice_NoSaveData = "저장된 데이터가 없습니다.";
     public const string Notice_NotEnoughMoney = "재화가 부족합니다.";
+    public const string Notice_NotSelectBoss = "보스를 선택해주세요.";
     public const string Notice_AdReward = "광고 보상을 획득했습니다.";
     public const string Notice_AdNotPrepared = "광고 준비중입니다.\n잠시만 기다려주세요.";
     public const string Notice_AdCountOver = "시청 횟수를 모두 소진하였습니다.";
 
     public const float StageChangeTime = 2.0f;
+    public const float CheerUpRate = 2.0f;
 
     public const int NumOfEnhances = 5;
     public const int NumOfTreasures = 5;
     public const int MaxFrame = 60;
     public const int MaxAttackDelay = 6000;
+    public const int CheerValue = 2;
 
     #region 열거형
     public enum GameDataVal
@@ -45,7 +51,8 @@ public class ConstValue
         LastAccessDayOfYear,
         LastAccessMinutes,
         AdCount_Gold_2hr,
-        AdCount_Gem_100
+        AdCount_Gem_100,
+        BossLv
     }
     public enum StageDataVal
     {
@@ -97,6 +104,16 @@ public class ConstValue
         GoodsType,
         GoodsValue
     }
+    public enum BossDataVal
+    {
+        Hp,
+        BossId,
+        BossName,
+        TimeLimit,
+        DropGold,
+        DropGem
+    }
+
 
     public enum Enhances
     {

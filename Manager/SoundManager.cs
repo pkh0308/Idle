@@ -13,7 +13,9 @@ public class SoundManager
     public enum Bgms
     {
         Sound_Title,
-        Sound_Main
+        Sound_Main,
+        Sound_Boss,
+        Sound_BossClear
     }
     public enum Sfxs
     {

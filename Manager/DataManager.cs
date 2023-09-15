@@ -13,6 +13,7 @@ public class DataManager
     const string WeaponDataPath = "/XML/WeaponDatas.xml";
     const string TreasureDataPath = "/XML/TreasureDatas.xml";
     const string ShopDataPath = "/XML/ShopDatas.xml";
+    const string BossDataPath = "/XML/BossDatas.xml";
 
     public GameData CurGameData { get; private set; }
 
@@ -21,6 +22,7 @@ public class DataManager
     Dictionary<int, WeaponData> _weaponDatas = new Dictionary<int, WeaponData>();
     Dictionary<int, TreasureData> _treasureDatas = new Dictionary<int, TreasureData>();
     Dictionary<int, ShopData> _shopDatas = new Dictionary<int, ShopData>();
+    Dictionary<int, BossData> _bossDatas = new Dictionary<int, BossData>();
 
     public void Init()
     {
@@ -30,6 +32,7 @@ public class DataManager
         LoadWeaponData();
         LoadTreasureeData();
         LoadShopData();
+        LoadBossData();
     }
 
     #region GameData
@@ -77,11 +80,13 @@ public class DataManager
             int adCnt_Gold_2hr = Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.AdCount_Gold_2hr.ToString()));
             int adCnt_Gem_100 = Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.AdCount_Gem_100.ToString()));
 
+            int bossLv = Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.BossLv.ToString()));
+
             //가져온 데이터 저장
             GameData data = new GameData(atkPowLv, atkSpeedLv, critChanceLv, critDmgLv, goldUpLv, weaponLv,
                                          tr_atkPowLv, tr_atkSpeedLv, tr_critChanceLv, tr_critDmgLv, tr_goldUpLv, 
                                          nickname, curGold, curGem, stageIdx, lastYear, lastDayOfYear, lastMins,
-                                         adCnt_Gold_2hr, adCnt_Gem_100);
+                                         adCnt_Gold_2hr, adCnt_Gem_100, bossLv);
             CurGameData = data;
         }
     }
@@ -367,6 +372,50 @@ public class DataManager
             return null;
         }
         return data;
+    }
+    #endregion
+
+    #region BossData
+    void LoadBossData()
+    {
+        //데이터를 형성할 문서 생성 및 파일읽기
+        XmlDocument doc = new XmlDocument();
+        string path = Application.dataPath + BossDataPath;
+        if (File.Exists(path) == false)
+        {
+            Debug.Log($"There is no BossDatas At {path}");
+            return;
+        }
+
+        // 루트 설정
+        doc.Load(path);
+        XmlElement nodes = doc[Root];
+        int idx = 0;
+        foreach (XmlElement node in nodes.ChildNodes)
+        {
+            // 속성 읽어오기
+            int hp = Convert.ToInt32(node.GetAttribute(ConstValue.BossDataVal.Hp.ToString()));
+            int id = Convert.ToInt32(node.GetAttribute(ConstValue.BossDataVal.BossId.ToString()));
+            string name = node.GetAttribute(ConstValue.BossDataVal.BossName.ToString());
+            int timeLimit = Convert.ToInt32(node.GetAttribute(ConstValue.BossDataVal.TimeLimit.ToString()));
+            int dropGold = Convert.ToInt32(node.GetAttribute(ConstValue.BossDataVal.DropGold.ToString()));
+            int dropGem = Convert.ToInt32(node.GetAttribute(ConstValue.BossDataVal.DropGem.ToString()));
+
+            //가져온 데이터 저장
+            BossData data = new BossData(hp, id, name, timeLimit, dropGold, dropGem);
+            _bossDatas.Add(idx, data);
+            idx++;
+        }
+    }
+
+    public BossData GetBossData(int stageIdx)
+    {
+        if (_bossDatas.TryGetValue(stageIdx, out BossData bData) == false)
+        {
+            Debug.Log($"Wrong Boss Idx: {stageIdx}");
+            return null;
+        }
+        return bData;
     }
     #endregion
 }

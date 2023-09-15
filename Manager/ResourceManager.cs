@@ -14,10 +14,7 @@ public class ResourceManager
     Dictionary<string, AsyncOperationHandle> _handles = new Dictionary<string, AsyncOperationHandle>();
     public int HandleCount { get; private set; }
 
-    public void Init()
-    {
-
-    }
+    public void Init() { }
 
     #region 리소스 로드
     public void Load<T>(string key, Action<T> callback) where T : Object
