@@ -29,6 +29,10 @@ public class ConstValue
     public const int MaxAttackDelay = 6000;
     public const int CheerValue = 2;
 
+    public const int Days = 365;
+    public const int Hours = 24;
+    public const int Minutes = 60;
+
     #region ¿­°ÅÇü
     public enum GameDataVal
     {

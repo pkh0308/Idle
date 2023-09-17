@@ -28,26 +28,19 @@ public class UI_OfflineRewardPopUp : UI_PopUp
 
         _offlineTimeText = GetText((int)Texts.OfflineTimeText);
         _rewardText = GetText((int)Texts.RewardText);
-        CalOfflineReward();
+        TextUpdate();
 
         Custom.GetOrAddComponent<UI_Base>(GetButton((int)Buttons.ExitBtn).gameObject).BindEvent(Btn_OnClickExit);
 
         return true;
     }
 
-    const int Days = 365;
-    const int Hours = 24;
-    const int Minutes = 60;
-    void CalOfflineReward()
+    void TextUpdate()
     {
-        int year = DateTime.Now.Year - Managers.Game.LastAccessYear;
-        int day = (DateTime.Now.DayOfYear + (year * Days)) - Managers.Game.LastAccessDayOfYear;
-        int minute = (day * Hours * Minutes) + (DateTime.Now.Hour * Minutes + DateTime.Now.Minute) - (Managers.Game.LastAccessMinutes);
-        _offlineTimeText.text = string.Format("오프라인 시간: {0:n00}시간 {1:n00}분", minute / 60, minute % 60); 
-
-        int testVal = minute * Managers.Game.GetRewardPerMinute();
-        _rewardText.text = Custom.CalUnit(testVal);
-        Managers.Game.GetGold(testVal);
+        int reward = Managers.Game.GetOfflineReward(out int minutes);
+        _rewardText.text = Custom.CalUnit(reward);
+        _offlineTimeText.text = string.Format("오프라인 시간: {0:00}시간 {1:00}분", minutes / 60, minutes % 60);
+        
     }
 
     #region 버튼

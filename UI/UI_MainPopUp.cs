@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
@@ -129,7 +130,8 @@ public class UI_MainPopUp : UI_PopUp
         _enemyField = GetImage((int)Images.EnemyField).rectTransform;
         _playerAnimator = GetImage((int)Images.Player).gameObject.GetComponent<Animator>();
 
-        if(Managers.Game.LastAccessMinutes > 0) // 이전 접속기록이 있다면 오프라인 보상
+        // 이전 접속기록이 있다면 오프라인 보상
+        if (Managers.Game.LastAccessMinutes > 0) 
             Managers.UI.OpenPopUp<UI_OfflineRewardPopUp>(typeof(UI_OfflineRewardPopUp).Name, transform);
         Managers.UI.OpenPopUp<UI_EnhancePopUp>(typeof(UI_EnhancePopUp).Name, transform, false);
         curMenu = Menus.Enhance;
@@ -451,7 +453,7 @@ public class UI_MainPopUp : UI_PopUp
             break;
         }
 
-        dmgText.color = critical ? Color.yellow : Color.white;
+        dmgText.color = critical ? Color.red : Color.white;
         dmgText.text = Custom.CalUnit(value);
         dmgText.gameObject.SetActive(true);
     }

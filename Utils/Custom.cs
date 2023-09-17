@@ -34,11 +34,19 @@ public class Custom
 
         string[] units = { "", "A", "B", "C", "D", "E", "F" };
         int count = 0;
+        int remain = 0;
         while (value > 1000)
         {
+            remain = value % 1000;
             value /= 1000;
             count++;
         }
-        return value + units[count];
+
+        if (value >= 100)
+            return value + units[count];
+        else if(value >= 10)
+            return string.Format("{0}.{1:0}{2}", value, remain / 100, units[count]);
+        else
+            return string.Format("{0}.{1:00}{2}", value, remain / 10, units[count]);
     }
 }

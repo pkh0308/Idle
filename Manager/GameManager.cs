@@ -6,13 +6,13 @@ using Random = UnityEngine.Random;
 
 public class GameManager
 {
-    enum GameState
+    public enum GameState
     {
         Title,
         Main, 
         Boss
     }
-    GameState curState;
+    public GameState CurState { get; private set; }
 
     enum Scenes
     {
@@ -23,7 +23,7 @@ public class GameManager
 
     public void Init()
     {
-        curState = GameState.Title;
+        CurState = GameState.Title;
     }
 
     #region GameData
@@ -91,7 +91,7 @@ public class GameManager
 
     public void UpdateGameData()
     {
-        if (curState == GameState.Title)
+        if (CurState == GameState.Title)
             return;
 
         // 마지막 접속과 같은 날이라면 카운트 유지, 아니라면 초기화
@@ -100,7 +100,7 @@ public class GameManager
         // 날짜 및 시간 갱신
         LastAccessYear = DateTime.Now.Year;
         LastAccessDayOfYear = DateTime.Now.DayOfYear;
-        LastAccessMinutes = DateTime.Now.Hour * 60 + DateTime.Now.Minute;
+        LastAccessMinutes = (DateTime.Now.Hour * ConstValue.Minutes) + DateTime.Now.Minute;
 
         GameData data = new GameData(AtkPowerLv, AtkSpeedLv, CritChanceLv, CritDamageLv, GoldUpLv, WeaponLv,
                                      Tr_AtkPowerLv, Tr_AtkSpeedLv, Tr_CritChanceLv, Tr_CritDamageLv, Tr_GoldUpLv,
@@ -115,8 +115,8 @@ public class GameManager
     {
         Managers.Data.CreateNewGameData(nickname);
         GetGameDataFromDataManager();
-        curState = GameState.Main;
-        InitPlayer();
+        CurState = GameState.Main;
+        UpdatePlayerStatus();
         SceneManager.LoadScene(Scenes.MainScene.ToString());
     }
 
@@ -126,8 +126,8 @@ public class GameManager
             return false;
 
         GetGameDataFromDataManager();
-        curState = GameState.Main;
-        InitPlayer();
+        CurState = GameState.Main;
+        UpdatePlayerStatus();
         SceneManager.LoadScene(Scenes.MainScene.ToString());
         return true;
     }
@@ -137,12 +137,12 @@ public class GameManager
         UpdateGameData();
         Managers.Data.SaveGameData();
         SceneManager.LoadScene(Scenes.TitleScene.ToString());
+        CurState = GameState.Title;
     }
 
     public void BackToMain()
     {
-        curState = GameState.Main;
-        InitPlayer();
+        UpdatePlayerStatus();
         SceneManager.LoadScene(Scenes.MainScene.ToString());
     }
     #endregion
@@ -189,6 +189,19 @@ public class GameManager
     // 오프라인 보상(1분당)
     public int GetRewardPerMinute() { return _stageData.DropGold; }
     public void GetGoldPerHour(int hour) { GetGold(_stageData.DropGold * 60 * hour); }
+
+    public int GetOfflineReward(out int minutes)
+    {
+        int year = DateTime.Now.Year - LastAccessYear;
+        int day = (DateTime.Now.DayOfYear + (year * ConstValue.Days)) - LastAccessDayOfYear;
+        int min = (day * ConstValue.Hours * ConstValue.Minutes) + (DateTime.Now.Hour * ConstValue.Minutes + DateTime.Now.Minute) - LastAccessMinutes;
+        minutes = min;
+        LastAccessMinutes = 0; // 오프라인 보상 중복 수령 방지
+
+        int offlineRwd = min * GetRewardPerMinute();
+        GetGold(offlineRwd);
+        return offlineRwd;
+    }
     #endregion
 
     #region 전투
@@ -202,13 +215,20 @@ public class GameManager
     public int EnemyHp { get; private set; }
     public int MaxEnemyHp { get; private set; }
 
-    public void InitPlayer()
+    public void UpdatePlayerStatus()
     {
-        _atkPow = Managers.Data.GetEnahnceValue((int)ConstValue.Enhances.AtkPow, AtkPowerLv);
-        _atkSpd = Managers.Data.GetEnahnceValue((int)ConstValue.Enhances.AtkSpd, AtkSpeedLv);
-        _critChance = Managers.Data.GetEnahnceValue((int)ConstValue.Enhances.CritChance, CritChanceLv);
-        _critDmg = Managers.Data.GetEnahnceValue((int)ConstValue.Enhances.CritDmg, CritDamageLv);
-        _goldUp = Managers.Data.GetEnahnceValue((int)ConstValue.Enhances.GoldUp, GoldUpLv);
+        WeaponData wData = Managers.Data.GetWeaponData(WeaponLv);
+        int tr_atkPow = Managers.Data.GetTreasureValue((int)ConstValue.Treasures.Tr_AtkPow, Tr_AtkPowerLv);
+        int tr_atkSpd = Managers.Data.GetTreasureValue((int)ConstValue.Treasures.Tr_AtkSpd, Tr_AtkSpeedLv);
+        int tr_critChance = Managers.Data.GetTreasureValue((int)ConstValue.Treasures.Tr_CritChance, Tr_CritChanceLv);
+        int tr_critDmg = Managers.Data.GetTreasureValue((int)ConstValue.Treasures.Tr_CritDmg, Tr_CritDamageLv);
+        int tr_goldUp = Managers.Data.GetTreasureValue((int)ConstValue.Treasures.Tr_GoldUp, Tr_GoldUpLv);
+
+        _atkPow = Managers.Data.GetEnahnceValue((int)ConstValue.Enhances.AtkPow, AtkPowerLv) + wData.AtkPower + tr_atkPow;
+        _atkSpd = Managers.Data.GetEnahnceValue((int)ConstValue.Enhances.AtkSpd, AtkSpeedLv) + tr_atkSpd;
+        _critChance = Managers.Data.GetEnahnceValue((int)ConstValue.Enhances.CritChance, CritChanceLv) + wData.CritChance + tr_critChance;
+        _critDmg = Managers.Data.GetEnahnceValue((int)ConstValue.Enhances.CritDmg, CritDamageLv) + wData.CritDamage + tr_critDmg;
+        _goldUp = Managers.Data.GetEnahnceValue((int)ConstValue.Enhances.GoldUp, GoldUpLv) + tr_goldUp;
     }
 
     public int CurEnemyCount { get; private set; }
@@ -229,11 +249,10 @@ public class GameManager
 
     public int Attack(out bool critical, bool cheerBuffOn = false)
     {
-        WeaponData wData = Managers.Data.GetWeaponData(WeaponLv);
-        critical = Random.Range(0, 10000) < _critChance + wData.CritChance;
-        int dmg = cheerBuffOn ? Convert.ToInt32((_atkPow + wData.AtkPower) * ConstValue.CheerUpRate) : _atkPow + wData.AtkPower;
+        critical = Random.Range(0, 10000) < _critChance;
+        int dmg = cheerBuffOn ? Convert.ToInt32(_atkPow * ConstValue.CheerUpRate) : _atkPow;
         if(critical) 
-            dmg = Convert.ToInt32(dmg * ((_critDmg + wData.CritDamage) / 10000.0f));
+            dmg = Convert.ToInt32(dmg * (_critDmg / 10000.0f));
 
         EnemyHp = EnemyHp > dmg ? EnemyHp - dmg : 0;
         return dmg;
@@ -299,6 +318,7 @@ public class GameManager
                 GoldUpLv++;
                 break;
         }
+        UpdatePlayerStatus();
         return true;
     }
 
@@ -326,6 +346,7 @@ public class GameManager
             return false;
 
         WeaponLv = level + 1;
+        UpdatePlayerStatus();
         return true;
     }
     #endregion
@@ -361,7 +382,8 @@ public class GameManager
             case (int)ConstValue.Treasures.Tr_GoldUp:
                 Tr_GoldUpLv++;
                 break;
-        }    
+        }
+        UpdatePlayerStatus();
         return true;
     }
 
@@ -441,7 +463,7 @@ public class GameManager
             return;
         }
 
-        curState = GameState.Boss;
+        CurState = GameState.Boss;
         SceneManager.LoadScene(Scenes.BossScene.ToString());
     }
 

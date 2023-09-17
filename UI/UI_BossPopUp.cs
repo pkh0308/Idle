@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,7 +9,7 @@ public class UI_BossPopUp : UI_PopUp
     enum Texts
     {
         BossNameText,
-        NickNameText,
+        TimerText,
         HpRateText,
         CheerAnnounceText,
         CheerBtnText,
@@ -20,6 +19,7 @@ public class UI_BossPopUp : UI_PopUp
         Reward_GoldText,
         ExitBtnText
     }
+    TextMeshProUGUI _timerText;
     TextMeshProUGUI _hpRateText;
     TextMeshProUGUI _cheerGuageText;
     TextMeshProUGUI[] _dmgTexts;
@@ -44,10 +44,8 @@ public class UI_BossPopUp : UI_PopUp
 
     enum AnimVar
     {
-        OnCombat,
         DoAttack,
-        DoNextStage,
-        DoBossAttack
+        DoClear
     }
     Animator _playerAnimator;
     #endregion
@@ -60,10 +58,10 @@ public class UI_BossPopUp : UI_PopUp
         BindImage(typeof(Images));
 
         // 텍스트 초기화
-        GetText((int)Texts.NickNameText).text = Managers.Game.NickName;
         GetText((int)Texts.BossNameText).text = Managers.Game.CurBossData.BossName;
         GetText((int)Texts.Reward_GemText).text = Custom.CalUnit(Managers.Game.CurBossData.DropGem);
         GetText((int)Texts.Reward_GoldText).text = Custom.CalUnit(Managers.Game.CurBossData.DropGold);
+        _timerText = GetText((int)Texts.TimerText);
         _hpRateText = GetText((int)Texts.HpRateText);
         _cheerGuageText = GetText((int)Texts.CheerGuageText);
         TextPooling();
@@ -84,7 +82,8 @@ public class UI_BossPopUp : UI_PopUp
         return true;
     }
 
-    Coroutine _CombatRoutine;
+    Coroutine _timerRoutine;
+    Coroutine _combatRoutine;
     void BossStageInit()
     {
         string name = ConstValue.Boss + Managers.Game.CurBossData.BossId;
@@ -95,12 +94,13 @@ public class UI_BossPopUp : UI_PopUp
 
         UpdateHpBar();
         UpdateCheerGuage();
-        _CombatRoutine = StartCoroutine(Combat());
+        _timerRoutine = StartCoroutine(Timer(Managers.Game.CurBossData.TimeLimit));
+        _combatRoutine = StartCoroutine(Combat());
     }
 
     void TextPooling()
     {
-        _dmgTexts = new TextMeshProUGUI[100];
+        _dmgTexts = new TextMeshProUGUI[10];
         for(int i = 0; i < _dmgTexts.Length; i++)
         {
             Managers.Resc.InstantiateByIdx(ConstValue.DmgText, i, transform, (op, idx) =>
@@ -146,7 +146,7 @@ public class UI_BossPopUp : UI_PopUp
 
     void Attack()
     {
-        _playerAnimator.SetTrigger(AnimVar.DoBossAttack.ToString());
+        _playerAnimator.SetTrigger(AnimVar.DoAttack.ToString());
         Managers.Sound.PlaySfx(SoundManager.Sfxs.Sound_Attack, 2.0f);
         int dmg = Managers.Game.Attack(out bool critical, _cheerComplete);
         ShowDmgText(dmg, critical);
@@ -168,7 +168,9 @@ public class UI_BossPopUp : UI_PopUp
             _boss.sprite = op;
         });
         Managers.Game.DefeatBoss();
-        StopCoroutine(_CombatRoutine);
+
+        StopCoroutine(_timerRoutine);
+        StopCoroutine(_combatRoutine);
         StartCoroutine(BossDisappear());
     }
 
@@ -183,7 +185,11 @@ public class UI_BossPopUp : UI_PopUp
             _boss.color = curColor;
             yield return Managers.Wfs.GetWaitForSeconds(DisappearCycle);
         }
+
         Managers.Sound.PlayBgm(SoundManager.Bgms.Sound_BossClear);
+        _playerAnimator.SetTrigger(AnimVar.DoClear.ToString());
+        yield return Managers.Wfs.GetWaitForSeconds(2.0f);
+
         Managers.UI.OpenPopUp<UI_BossClearPopUp>();
     }
     #endregion
@@ -254,6 +260,28 @@ public class UI_BossPopUp : UI_PopUp
         }
         _cheerComplete = false;
         _cheerGuageText.text = Cheering;
+    }
+    #endregion
+
+    #region 타이머
+    IEnumerator Timer(int seconds)
+    {
+        while(seconds > 0)
+        {
+            seconds--;
+            if(seconds == 10)
+                _timerText.color = Color.red;
+
+            _timerText.text = string.Format("{0:00}:{1:00}", seconds / 60, seconds % 60);
+            yield return Managers.Wfs.GetWaitForSeconds(1.0f);
+        }
+        TimeOut();
+    }
+
+    void TimeOut()
+    {
+        StopCoroutine(_combatRoutine);
+        Managers.UI.OpenPopUp<UI_BossClearPopUp>();
     }
     #endregion
 }
