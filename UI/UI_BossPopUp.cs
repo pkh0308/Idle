@@ -78,8 +78,30 @@ public class UI_BossPopUp : UI_PopUp
 
         // Bgm
         Managers.Sound.PlayBgm(SoundManager.Bgms.Sound_Boss);
-        BossStageInit();
         return true;
+    }
+
+    int _textLoadCount;
+    void TextPooling()
+    {
+        _dmgTexts = new TextMeshProUGUI[10];
+        _textLoadCount = 10;
+        for (int i = 0; i < _dmgTexts.Length; i++)
+        {
+            Managers.Resc.InstantiateByIdx(ConstValue.DmgText, i, transform, (op, idx) =>
+            {
+                _dmgTexts[idx] = op.GetComponent<TextMeshProUGUI>();
+                op.SetActive(false);
+                TextCount();
+            });
+        }
+    }
+
+    void TextCount()
+    {
+        _textLoadCount--;
+        if (_textLoadCount == 0)
+            BossStageInit();
     }
 
     Coroutine _timerRoutine;
@@ -96,19 +118,6 @@ public class UI_BossPopUp : UI_PopUp
         UpdateCheerGuage();
         _timerRoutine = StartCoroutine(Timer(Managers.Game.CurBossData.TimeLimit));
         _combatRoutine = StartCoroutine(Combat());
-    }
-
-    void TextPooling()
-    {
-        _dmgTexts = new TextMeshProUGUI[10];
-        for(int i = 0; i < _dmgTexts.Length; i++)
-        {
-            Managers.Resc.InstantiateByIdx(ConstValue.DmgText, i, transform, (op, idx) =>
-            {
-                _dmgTexts[idx] = op.GetComponent<TextMeshProUGUI>();
-                op.SetActive(false);
-            });
-        }
     }
     #endregion
 

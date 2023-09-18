@@ -330,6 +330,26 @@ public class DataManager
 
     public int GetTreasureCost(int idx, int level) { return GetTreasureData(idx, level, true); }
     public int GetTreasureValue(int idx, int level) { return GetTreasureData(idx, level, false); }
+
+    string GetTreasureByString(int level, int idx = -1)
+    {
+        if (_treasureDatas.TryGetValue(level, out TreasureData data) == false)
+        {
+            Debug.Log($"Wrong level for Treasure: {level}");
+            return null;
+        }
+
+        // 최고 레벨일 경우
+        if (_treasureDatas.TryGetValue(level + 1, out TreasureData nextData) == false)
+            return idx < 0 ? ConstValue.Max : $"{data.GetValue(idx) / 100}%";
+
+        // 최고 레벨이 아닐 경우
+        // 다음 레벨 정보 노출
+        return idx < 0 ? (level + 1).ToString() : $"{nextData.GetValue(idx) / 100}%";
+    }
+
+    public string GetTrLevelByStr(int level) { return GetTreasureByString(level); }
+    public string GetTrValueByStr(int level, int idx) { return GetTreasureByString(level, idx); }
     #endregion
 
     #region ShopData

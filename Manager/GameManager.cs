@@ -218,17 +218,17 @@ public class GameManager
     public void UpdatePlayerStatus()
     {
         WeaponData wData = Managers.Data.GetWeaponData(WeaponLv);
-        int tr_atkPow = Managers.Data.GetTreasureValue((int)ConstValue.Treasures.Tr_AtkPow, Tr_AtkPowerLv);
-        int tr_atkSpd = Managers.Data.GetTreasureValue((int)ConstValue.Treasures.Tr_AtkSpd, Tr_AtkSpeedLv);
-        int tr_critChance = Managers.Data.GetTreasureValue((int)ConstValue.Treasures.Tr_CritChance, Tr_CritChanceLv);
-        int tr_critDmg = Managers.Data.GetTreasureValue((int)ConstValue.Treasures.Tr_CritDmg, Tr_CritDamageLv);
-        int tr_goldUp = Managers.Data.GetTreasureValue((int)ConstValue.Treasures.Tr_GoldUp, Tr_GoldUpLv);
+        float tr_atkPow = 1 + Managers.Data.GetTreasureValue((int)ConstValue.Treasures.Tr_AtkPow, Tr_AtkPowerLv) / 10000.0f;
+        float tr_atkSpd = 1 + Managers.Data.GetTreasureValue((int)ConstValue.Treasures.Tr_AtkSpd, Tr_AtkSpeedLv) / 10000.0f;
+        float tr_critChance = 1 + Managers.Data.GetTreasureValue((int)ConstValue.Treasures.Tr_CritChance, Tr_CritChanceLv) / 10000.0f;
+        float tr_critDmg = 1 + Managers.Data.GetTreasureValue((int)ConstValue.Treasures.Tr_CritDmg, Tr_CritDamageLv) / 10000.0f;
+        float tr_goldUp = 1 + Managers.Data.GetTreasureValue((int)ConstValue.Treasures.Tr_GoldUp, Tr_GoldUpLv) / 10000.0f;
 
-        _atkPow = Managers.Data.GetEnahnceValue((int)ConstValue.Enhances.AtkPow, AtkPowerLv) + wData.AtkPower + tr_atkPow;
-        _atkSpd = Managers.Data.GetEnahnceValue((int)ConstValue.Enhances.AtkSpd, AtkSpeedLv) + tr_atkSpd;
-        _critChance = Managers.Data.GetEnahnceValue((int)ConstValue.Enhances.CritChance, CritChanceLv) + wData.CritChance + tr_critChance;
-        _critDmg = Managers.Data.GetEnahnceValue((int)ConstValue.Enhances.CritDmg, CritDamageLv) + wData.CritDamage + tr_critDmg;
-        _goldUp = Managers.Data.GetEnahnceValue((int)ConstValue.Enhances.GoldUp, GoldUpLv) + tr_goldUp;
+        _atkPow = (int)((Managers.Data.GetEnahnceValue((int)ConstValue.Enhances.CritChance, CritChanceLv) + wData.CritChance) * tr_atkPow);
+        _atkSpd = (int)(Managers.Data.GetEnahnceValue((int)ConstValue.Enhances.AtkSpd, AtkSpeedLv) * tr_atkSpd);
+        _critChance = (int)((Managers.Data.GetEnahnceValue((int)ConstValue.Enhances.CritChance, CritChanceLv) + wData.CritChance) * tr_critChance);
+        _critDmg = (int)((Managers.Data.GetEnahnceValue((int)ConstValue.Enhances.CritDmg, CritDamageLv) + wData.CritDamage) * tr_critDmg);
+        _goldUp = (int)(Managers.Data.GetEnahnceValue((int)ConstValue.Enhances.GoldUp, GoldUpLv) * tr_goldUp);
     }
 
     public int CurEnemyCount { get; private set; }
@@ -273,11 +273,7 @@ public class GameManager
         return false;
     }
 
-    public int GetAttackDelay()
-    {
-        int tr_atkSpeed = Managers.Data.GetTreasureValue((int)ConstValue.Treasures.Tr_AtkPow, Tr_AtkSpeedLv);
-        return Convert.ToInt32(_atkSpd * (1 + (tr_atkSpeed / 10000.0f)));
-    }
+    public int GetAttackDelay() { return _atkSpd; }
 
     public void GetGoldFromEnemy() { CurGold += (int)(_stageData.DropGold * (_goldUp / 10000.0f)); }
     public void GetGemFromEnemy() { CurGem += _stageData.DropGem; }
