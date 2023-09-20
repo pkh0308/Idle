@@ -126,6 +126,7 @@ public class DataManager
     #endregion
 
     #region StageData
+    public int MaxStageIdx { get; private set; }
     void LoadStageData()
     {
         //데이터를 형성할 문서 생성 및 파일읽기
@@ -156,6 +157,7 @@ public class DataManager
             _stageDatas.Add(idx, data);
             idx++;
         }
+        MaxStageIdx = _stageDatas.Count - 1;
     }
 
     public StageData GetStageData(int stageIdx)
@@ -428,11 +430,11 @@ public class DataManager
         }
     }
 
-    public BossData GetBossData(int stageIdx)
+    public BossData GetBossData(int bossIdx)
     {
-        if (_bossDatas.TryGetValue(stageIdx, out BossData bData) == false)
+        if (_bossDatas.TryGetValue(bossIdx, out BossData bData) == false)
         {
-            Debug.Log($"Wrong Boss Idx: {stageIdx}");
+            Debug.Log($"Wrong Boss Idx: {bossIdx}");
             return null;
         }
         return bData;

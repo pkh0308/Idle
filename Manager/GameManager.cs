@@ -18,7 +18,8 @@ public class GameManager
     {
         TitleScene,
         MainScene,
-        BossScene
+        BossScene,
+        EndingScene
     }
 
     public void Init()
@@ -117,7 +118,7 @@ public class GameManager
         GetGameDataFromDataManager();
         CurState = GameState.Main;
         UpdatePlayerStatus();
-        SceneManager.LoadScene(Scenes.MainScene.ToString());
+        LoadScene(Scenes.MainScene.ToString());
     }
 
     public bool LoadGame()
@@ -128,7 +129,7 @@ public class GameManager
         GetGameDataFromDataManager();
         CurState = GameState.Main;
         UpdatePlayerStatus();
-        SceneManager.LoadScene(Scenes.MainScene.ToString());
+        LoadScene(Scenes.MainScene.ToString());
         return true;
     }
 
@@ -136,14 +137,23 @@ public class GameManager
     {
         UpdateGameData();
         Managers.Data.SaveGameData();
-        SceneManager.LoadScene(Scenes.TitleScene.ToString());
+        LoadScene(Scenes.TitleScene.ToString());
         CurState = GameState.Title;
     }
 
     public void BackToMain()
     {
         UpdatePlayerStatus();
-        SceneManager.LoadScene(Scenes.MainScene.ToString());
+        LoadScene(Scenes.MainScene.ToString());
+    }
+    #endregion
+
+    #region 씬 이동
+    void LoadScene(string sceneName)
+    {
+        Managers.UI.ClearStack();
+        Managers.Resc.Clear();
+        SceneManager.LoadScene(sceneName);
     }
     #endregion
 
@@ -236,6 +246,10 @@ public class GameManager
     int[] _enemyIds;
     public void InitStage()
     {
+        // 게임 오버
+        if(CurStageIdx > Managers.Data.MaxStageIdx)
+            LoadScene(Scenes.EndingScene.ToString());
+
         _stageData = Managers.Data.GetStageData(CurStageIdx);
         MaxEnemyHp = _stageData.Hp;
         EnemyHp = MaxEnemyHp;
@@ -250,7 +264,7 @@ public class GameManager
     public int Attack(out bool critical, bool cheerBuffOn = false)
     {
         critical = Random.Range(0, 10000) < _critChance;
-        int dmg = cheerBuffOn ? Convert.ToInt32(_atkPow * ConstValue.CheerUpRate) : _atkPow;
+        int dmg = cheerBuffOn ? Convert.ToInt32(_atkPow * ConstValue.CheerBuffRate) : _atkPow;
         if(critical) 
             dmg = Convert.ToInt32(dmg * (_critDmg / 10000.0f));
 
@@ -460,7 +474,7 @@ public class GameManager
         }
 
         CurState = GameState.Boss;
-        SceneManager.LoadScene(Scenes.BossScene.ToString());
+        LoadScene(Scenes.BossScene.ToString());
     }
 
     public void InitBoss()

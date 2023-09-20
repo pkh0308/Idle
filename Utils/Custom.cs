@@ -32,6 +32,10 @@ public class Custom
         if (value < 0)
             return ConstValue.Max;
 
+        if (value < 1000)
+            return value.ToString();
+
+        // 1000 이상부터 단위 추가
         string[] units = { "", "A", "B", "C", "D", "E", "F" };
         int count = 0;
         int remain = 0;

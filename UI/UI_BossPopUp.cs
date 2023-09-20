@@ -106,6 +106,7 @@ public class UI_BossPopUp : UI_PopUp
 
     Coroutine _timerRoutine;
     Coroutine _combatRoutine;
+    Coroutine _cheerRoutine;
     void BossStageInit()
     {
         string name = ConstValue.Boss + Managers.Game.CurBossData.BossId;
@@ -118,6 +119,7 @@ public class UI_BossPopUp : UI_PopUp
         UpdateCheerGuage();
         _timerRoutine = StartCoroutine(Timer(Managers.Game.CurBossData.TimeLimit));
         _combatRoutine = StartCoroutine(Combat());
+        _cheerRoutine = StartCoroutine(CheerUp());
     }
     #endregion
 
@@ -178,8 +180,7 @@ public class UI_BossPopUp : UI_PopUp
         });
         Managers.Game.DefeatBoss();
 
-        StopCoroutine(_timerRoutine);
-        StopCoroutine(_combatRoutine);
+        StopAllCoroutines();
         StartCoroutine(BossDisappear());
     }
 
@@ -249,26 +250,34 @@ public class UI_BossPopUp : UI_PopUp
         if (_cheerComplete)
             return;
 
-        cheerCount += ConstValue.CheerValue;
+        cheerCount += ConstValue.CheerUpValue;
         UpdateCheerGuage();
         if (cheerCount >= maxCheerCount)
         {
             _cheerComplete = true;
-            _cheerGuageText.text = $"응원 버프 발동! (공격력 x{ConstValue.CheerValue})";
-            StartCoroutine(CheerUp());
+            _cheerGuageText.text = $"응원 버프 발동! (공격력 x{ConstValue.CheerBuffRate})";
         }
     }
 
     IEnumerator CheerUp()
     {
-        while(cheerCount > 0)
+        while (true)
         {
+            if (cheerCount == 0)
+            {
+                yield return null;
+                continue;
+            }
+
             cheerCount--;
             UpdateCheerGuage();
+            if(cheerCount == 0 && _cheerComplete)
+            {
+                _cheerComplete = false;
+                _cheerGuageText.text = Cheering;
+            }
             yield return null;
         }
-        _cheerComplete = false;
-        _cheerGuageText.text = Cheering;
     }
     #endregion
 

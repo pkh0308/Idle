@@ -1,5 +1,3 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine.UI;
@@ -14,9 +12,6 @@ public class UI_BossTryPopUp : UI_PopUp
         Boss_03BtnText,
         Boss_04BtnText,
         Boss_05BtnText,
-        Boss_06BtnText,
-        Boss_07BtnText,
-        BossTryBtnText,
         TitleText,
         DescriptionText,
         ExitBtnText
@@ -30,8 +25,6 @@ public class UI_BossTryPopUp : UI_PopUp
         Boss_03Btn,
         Boss_04Btn,
         Boss_05Btn,
-        Boss_06Btn,
-        Boss_07Btn,
         BossTryBtn,
         ExitBtn
     }
@@ -42,20 +35,16 @@ public class UI_BossTryPopUp : UI_PopUp
         Boss_03Btn_Lock,
         Boss_04Btn_Lock,
         Boss_05Btn_Lock,
-        Boss_06Btn_Lock,
-        Boss_07Btn_Lock,
         Boss_01Btn_Cleared,
         Boss_02Btn_Cleared,
         Boss_03Btn_Cleared,
         Boss_04Btn_Cleared,
         Boss_05Btn_Cleared,
-        Boss_06Btn_Cleared,
-        Boss_07Btn_Cleared
     }
     List<Image> _lockImgs = new List<Image>(BossCount);
     List<Image> _clearImgs = new List<Image>(BossCount);
 
-    const int BossCount = 7;
+    const int BossCount = 5;
     #endregion
 
     #region 초기화
@@ -65,10 +54,10 @@ public class UI_BossTryPopUp : UI_PopUp
         BindButton(typeof(Buttons));
         BindImage(typeof(Images));
 
-        for (int i = 0; i < BossCount; i++)
+        for (int idx = 0; idx < BossCount; idx++)
         {
-            _bossBtnTexts.Add(GetText((int)Texts.Boss_01BtnText + i));
-            _bossBtnTexts[i].text = $"난이도 {i + 1}: {i}";
+            _bossBtnTexts.Add(GetText((int)Texts.Boss_01BtnText + idx));
+            _bossBtnTexts[idx].text = $"난이도 {idx + 1}: {Managers.Data.GetBossData(idx).BossName}";
         }
 
         Custom.GetOrAddComponent<UI_Base>(GetButton((int)Buttons.Boss_01Btn).gameObject).BindEvent(Btn_OnClickBoss_01);
@@ -76,8 +65,6 @@ public class UI_BossTryPopUp : UI_PopUp
         Custom.GetOrAddComponent<UI_Base>(GetButton((int)Buttons.Boss_03Btn).gameObject).BindEvent(Btn_OnClickBoss_03);
         Custom.GetOrAddComponent<UI_Base>(GetButton((int)Buttons.Boss_04Btn).gameObject).BindEvent(Btn_OnClickBoss_04);
         Custom.GetOrAddComponent<UI_Base>(GetButton((int)Buttons.Boss_05Btn).gameObject).BindEvent(Btn_OnClickBoss_05);
-        Custom.GetOrAddComponent<UI_Base>(GetButton((int)Buttons.Boss_06Btn).gameObject).BindEvent(Btn_OnClickBoss_06);
-        Custom.GetOrAddComponent<UI_Base>(GetButton((int)Buttons.Boss_07Btn).gameObject).BindEvent(Btn_OnClickBoss_07);
         Custom.GetOrAddComponent<UI_Base>(GetButton((int)Buttons.BossTryBtn).gameObject).BindEvent(Btn_OnClickBossTry);
         Custom.GetOrAddComponent<UI_Base>(GetButton((int)Buttons.ExitBtn).gameObject).BindEvent(Btn_OnClickExit);
 
@@ -124,8 +111,6 @@ public class UI_BossTryPopUp : UI_PopUp
     public void Btn_OnClickBoss_03() { _curBossId = (int)Buttons.Boss_03Btn; }
     public void Btn_OnClickBoss_04() { _curBossId = (int)Buttons.Boss_04Btn; }
     public void Btn_OnClickBoss_05() { _curBossId = (int)Buttons.Boss_05Btn; }
-    public void Btn_OnClickBoss_06() { _curBossId = (int)Buttons.Boss_06Btn; }
-    public void Btn_OnClickBoss_07() { _curBossId = (int)Buttons.Boss_07Btn; }
 
     public void Btn_OnClickBossTry() 
     { 

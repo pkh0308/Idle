@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using UnityEngine;
 
 public class UIManager 
@@ -72,5 +73,10 @@ public class UIManager
         
         Object.Destroy(_stack.Pop().gameObject);
         return true;
+    }
+
+    public void ClearStack()
+    {
+        _stack.Clear();
     }
 }

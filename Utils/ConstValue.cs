@@ -21,13 +21,13 @@ public class ConstValue
     public const string Notice_AdCountOver = "시청 횟수를 모두 소진하였습니다.";
 
     public const float StageChangeTime = 2.0f;
-    public const float CheerUpRate = 2.0f;
+    public const float CheerBuffRate = 2.0f;
 
     public const int NumOfEnhances = 5;
     public const int NumOfTreasures = 5;
     public const int MaxFrame = 60;
     public const int MaxAttackDelay = 6000;
-    public const int CheerValue = 2;
+    public const int CheerUpValue = 3;
 
     public const int Days = 365;
     public const int Hours = 24;
