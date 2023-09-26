@@ -9,6 +9,7 @@ public class ConstValue
     public const string Boss = "Boss_";
     public const string Sprite_BossDie = "Sprite_BossDie_";
     public const string DmgText = "DamageText";
+    public const string DmgTextParent = "DamageTextParent";
 
     // notice
     public const string Notice_LessThan2 = "닉네임은 2자 이상이어야 합니다.";

@@ -10,7 +10,8 @@ public class GameManager
     {
         Title,
         Main, 
-        Boss
+        Boss,
+        Clear
     }
     public GameState CurState { get; private set; }
 
@@ -92,7 +93,7 @@ public class GameManager
 
     public void UpdateGameData()
     {
-        if (CurState == GameState.Title)
+        if (CurState == GameState.Title || CurState == GameState.Clear)
             return;
 
         // 마지막 접속과 같은 날이라면 카운트 유지, 아니라면 초기화
@@ -126,7 +127,11 @@ public class GameManager
         if (Managers.Data.CurGameData == null)
             return false;
 
+        // 클리어 데이터라면 없는 것으로 취급
         GetGameDataFromDataManager();
+        if (CurStageIdx > Managers.Data.MaxStageIdx)
+            return false;
+
         CurState = GameState.Main;
         UpdatePlayerStatus();
         LoadScene(Scenes.MainScene.ToString());
@@ -234,7 +239,7 @@ public class GameManager
         float tr_critDmg = 1 + Managers.Data.GetTreasureValue((int)ConstValue.Treasures.Tr_CritDmg, Tr_CritDamageLv) / 10000.0f;
         float tr_goldUp = 1 + Managers.Data.GetTreasureValue((int)ConstValue.Treasures.Tr_GoldUp, Tr_GoldUpLv) / 10000.0f;
 
-        _atkPow = (int)((Managers.Data.GetEnahnceValue((int)ConstValue.Enhances.CritChance, CritChanceLv) + wData.CritChance) * tr_atkPow);
+        _atkPow = (int)((Managers.Data.GetEnahnceValue((int)ConstValue.Enhances.AtkPow, AtkPowerLv) + wData.AtkPower) * tr_atkPow);
         _atkSpd = (int)(Managers.Data.GetEnahnceValue((int)ConstValue.Enhances.AtkSpd, AtkSpeedLv) * tr_atkSpd);
         _critChance = (int)((Managers.Data.GetEnahnceValue((int)ConstValue.Enhances.CritChance, CritChanceLv) + wData.CritChance) * tr_critChance);
         _critDmg = (int)((Managers.Data.GetEnahnceValue((int)ConstValue.Enhances.CritDmg, CritDamageLv) + wData.CritDamage) * tr_critDmg);
@@ -248,7 +253,10 @@ public class GameManager
     {
         // 게임 오버
         if(CurStageIdx > Managers.Data.MaxStageIdx)
-            LoadScene(Scenes.EndingScene.ToString());
+        {
+            GameOver();
+            return;
+        }
 
         _stageData = Managers.Data.GetStageData(CurStageIdx);
         MaxEnemyHp = _stageData.Hp;
@@ -498,6 +506,16 @@ public class GameManager
     public void ExitBossTry()
     {
         BackToMain();
+    }
+    #endregion
+
+    #region 게임 오버
+    void GameOver()
+    {
+        UpdateGameData();
+        Managers.Data.SaveGameData();
+        LoadScene(Scenes.EndingScene.ToString());
+        CurState = GameState.Clear;
     }
     #endregion
 }

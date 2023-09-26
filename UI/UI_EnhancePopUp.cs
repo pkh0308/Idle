@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class UI_EnhancePopUp : UI_PopUp
 {
+    #region 변수 및 열거형
     enum Texts
     {
         AtkPowerText,
@@ -39,7 +40,9 @@ public class UI_EnhancePopUp : UI_PopUp
         CritDamageBtn,
         GoldUpBtn
     }
+    #endregion
 
+    #region 초기화
     public override bool Init()
     {
         BindText(typeof(Texts));
@@ -66,6 +69,7 @@ public class UI_EnhancePopUp : UI_PopUp
         UpdateBtns();
         return true;
     }
+    #endregion
 
     #region 버튼
     public void Btn_OnClickAtkPower()
@@ -141,10 +145,10 @@ public class UI_EnhancePopUp : UI_PopUp
         _goldUpText.text = $"획득 골드 증가 (Lv.{GetLevel(goldUp, Managers.Game.GoldUpLv)})";
 
         _atkPowerBtnText.text = Custom.CalUnit(Managers.Data.GetEnahnceCost(atkPow, Managers.Game.AtkPowerLv));
-        _atkSpeedBtnText.text = Custom.CalUnit(Managers.Data.GetEnahnceCost(atkSpd, Managers.Game.AtkPowerLv));
-        _critChanceBtnText.text = Custom.CalUnit(Managers.Data.GetEnahnceCost(critChance, Managers.Game.AtkPowerLv));
-        _critDamageBtnText.text = Custom.CalUnit(Managers.Data.GetEnahnceCost(critDmg, Managers.Game.AtkPowerLv));
-        _goldUpBtnText.text = Custom.CalUnit(Managers.Data.GetEnahnceCost(goldUp, Managers.Game.AtkPowerLv));
+        _atkSpeedBtnText.text = Custom.CalUnit(Managers.Data.GetEnahnceCost(atkSpd, Managers.Game.AtkSpeedLv));
+        _critChanceBtnText.text = Custom.CalUnit(Managers.Data.GetEnahnceCost(critChance, Managers.Game.CritChanceLv));
+        _critDamageBtnText.text = Custom.CalUnit(Managers.Data.GetEnahnceCost(critDmg, Managers.Game.CritDamageLv));
+        _goldUpBtnText.text = Custom.CalUnit(Managers.Data.GetEnahnceCost(goldUp, Managers.Game.GoldUpLv));
     }
 
     string GetLevel(int idx, int level)

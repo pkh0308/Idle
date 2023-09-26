@@ -10,7 +10,7 @@ public class EndingSceneController : SceneController
             return false;
 
         _initialized = true;
-        //Managers.UI.OpenScene<UI_EndingPopUp>();
+        Managers.UI.OpenScene<UI_EndingPopUp>();
         return true;
     }
 }

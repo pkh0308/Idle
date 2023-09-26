@@ -24,7 +24,7 @@ public class UI_MainPopUp : UI_PopUp
     TextMeshProUGUI _goldText;
     TextMeshProUGUI _gemText;
     TextMeshProUGUI[] _dmgTexts;
-    const string STAGE = "Stage ";
+    Transform _dmgTextParent;
 
     enum Buttons
     {
@@ -47,6 +47,10 @@ public class UI_MainPopUp : UI_PopUp
         WeaponBtn,
         TreasureBtn,
         ShopBtn,
+        UI_EnhancePopUp,
+        UI_WeaponPopUp,
+        UI_TreasurePopUp,
+        UI_ShopPopUp,
         GoldIcon,
         GemIcon,
         BlackScene
@@ -55,6 +59,7 @@ public class UI_MainPopUp : UI_PopUp
     Image _weaponBtn;
     Image _treasureBtn;
     Image _shopBtn;
+    GameObject[] _mainPopUps;
 
     Image _front;
     Image _back;
@@ -83,6 +88,7 @@ public class UI_MainPopUp : UI_PopUp
         Shop
     }
     Menus curMenu;
+    const int NumOfMenus = 4;
 
     enum State
     {
@@ -120,6 +126,12 @@ public class UI_MainPopUp : UI_PopUp
         _treasureBtn = GetImage((int)Images.TreasureBtn);
         _shopBtn = GetImage((int)Images.ShopBtn);
 
+        _mainPopUps = new GameObject[NumOfMenus];
+        _mainPopUps[(int)Menus.Enhance] = GetImage((int)Images.UI_EnhancePopUp).gameObject;
+        _mainPopUps[(int)Menus.Weapon] = GetImage((int)Images.UI_WeaponPopUp).gameObject;
+        _mainPopUps[(int)Menus.Treasure] = GetImage((int)Images.UI_TreasurePopUp).gameObject;
+        _mainPopUps[(int)Menus.Shop] = GetImage((int)Images.UI_ShopPopUp).gameObject;
+
         _front = GetImage((int)Images.Field01);
         _back = GetImage((int)Images.Field02);
         _hpBar = GetImage((int)Images.HpBar);
@@ -133,11 +145,11 @@ public class UI_MainPopUp : UI_PopUp
         // 이전 접속기록이 있다면 오프라인 보상
         if (Managers.Game.LastAccessMinutes > 0) 
             Managers.UI.OpenPopUp<UI_OfflineRewardPopUp>(typeof(UI_OfflineRewardPopUp).Name, transform);
-        Managers.UI.OpenPopUp<UI_EnhancePopUp>(typeof(UI_EnhancePopUp).Name, transform, false);
         curMenu = Menus.Enhance;
         curState = State.Moving;
 
         // UI 초기화
+        _dmgTextParent = transform.GetChild(0).Find(ConstValue.DmgTextParent);
         TextPooling();
         UpdateGoldGem();
         UpdateStageText();
@@ -156,6 +168,9 @@ public class UI_MainPopUp : UI_PopUp
     void InitialSetActiveFalse()
     { 
         _hpBarBg.gameObject.SetActive(false);
+        // 첫번째 메뉴(강화) 외 비활성화
+        for(int i = 1; i < NumOfMenus; i++)
+            _mainPopUps[i].SetActive(false);
     }
 
     void TextPooling()
@@ -163,7 +178,7 @@ public class UI_MainPopUp : UI_PopUp
         _dmgTexts = new TextMeshProUGUI[100];
         for (int i = 0; i < _dmgTexts.Length; i++)
         {
-            Managers.Resc.InstantiateByIdx(ConstValue.DmgText, i, transform, (op, idx) =>
+            Managers.Resc.InstantiateByIdx(ConstValue.DmgText, i, _dmgTextParent, (op, idx) =>
             {
                 _dmgTexts[idx] = op.GetComponent<TextMeshProUGUI>();
                 op.SetActive(false);
@@ -178,8 +193,9 @@ public class UI_MainPopUp : UI_PopUp
         if (curMenu == Menus.Enhance)
             return;
 
-        Managers.UI.OpenPopUp<UI_EnhancePopUp>(typeof(UI_EnhancePopUp).Name, transform, false);
+        _mainPopUps[(int)curMenu].SetActive(false);
         curMenu = Menus.Enhance;
+        _mainPopUps[(int)curMenu].SetActive(true);
         UpdateMenuButtons();
     }
     public void Btn_OnClickWeapon()
@@ -187,8 +203,9 @@ public class UI_MainPopUp : UI_PopUp
         if (curMenu == Menus.Weapon)
             return;
 
-        Managers.UI.OpenPopUp<UI_WeaponPopUp>(typeof(UI_WeaponPopUp).Name, transform, false);
+        _mainPopUps[(int)curMenu].SetActive(false);
         curMenu = Menus.Weapon;
+        _mainPopUps[(int)curMenu].SetActive(true);
         UpdateMenuButtons();
     }
     public void Btn_OnClickTreasure()
@@ -196,8 +213,9 @@ public class UI_MainPopUp : UI_PopUp
         if (curMenu == Menus.Treasure)
             return;
 
-        Managers.UI.OpenPopUp<UI_TreasurePopUp>(typeof(UI_TreasurePopUp).Name, transform, false);
+        _mainPopUps[(int)curMenu].SetActive(false);
         curMenu = Menus.Treasure;
+        _mainPopUps[(int)curMenu].SetActive(true);
         UpdateMenuButtons();
     }
     public void Btn_OnClickShop()
@@ -205,8 +223,9 @@ public class UI_MainPopUp : UI_PopUp
         if (curMenu == Menus.Shop)
             return;
 
-        Managers.UI.OpenPopUp<UI_ShopPopUp>(typeof(UI_ShopPopUp).Name, transform, false);
+        _mainPopUps[(int)curMenu].SetActive(false);
         curMenu = Menus.Shop;
+        _mainPopUps[(int)curMenu].SetActive(true);
         UpdateMenuButtons();
     }
 
@@ -415,14 +434,16 @@ public class UI_MainPopUp : UI_PopUp
     {
         int floor = 1,  stage = 1;
         int stageIdx = Managers.Game.CurStageIdx;
+        if(stageIdx > Managers.Data.MaxStageIdx)
+            _stageText.gameObject.SetActive(false);
 
-        while(stageIdx > 100)
+        while (stageIdx > 100)
         {
             stageIdx /= 100;
             floor++;
         }
         stage += stageIdx;
-        _stageText.text = STAGE + floor + " - " + stage;
+        _stageText.text = $"Stage {floor} - {stage}";
     }
 
     const string Menu_Normal = "Sprite_Menu_Normal";

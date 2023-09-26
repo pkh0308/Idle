@@ -158,6 +158,10 @@ public class DataManager
             idx++;
         }
         MaxStageIdx = _stageDatas.Count - 1;
+
+        // 클리어한 데이터라면 null처리
+        if (CurGameData != null && CurGameData.StageIdx > MaxStageIdx)
+            CurGameData = null;
     }
 
     public StageData GetStageData(int stageIdx)

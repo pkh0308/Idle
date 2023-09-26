@@ -1,10 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
 public class UI_TreasurePopUp : UI_PopUp
 {
+    #region 열거형 및 변수
     enum Texts
     {
         AtkPowerText,
@@ -37,7 +36,9 @@ public class UI_TreasurePopUp : UI_PopUp
         CritDamageBtn,
         GoldUpBtn
     }
+    #endregion
 
+    #region 초기화
     public override bool Init()
     {
         BindText(typeof(Texts));
@@ -63,6 +64,7 @@ public class UI_TreasurePopUp : UI_PopUp
         UpdateBtns();
         return true;
     }
+    #endregion
 
     #region 버튼
     public void Btn_OnClickAtkPower()

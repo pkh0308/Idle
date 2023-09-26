@@ -23,6 +23,7 @@ public class UI_BossPopUp : UI_PopUp
     TextMeshProUGUI _hpRateText;
     TextMeshProUGUI _cheerGuageText;
     TextMeshProUGUI[] _dmgTexts;
+    Transform _dmgTextParent;
     const string Cheering = "응원 게이지";
 
     enum Buttons
@@ -64,6 +65,8 @@ public class UI_BossPopUp : UI_PopUp
         _timerText = GetText((int)Texts.TimerText);
         _hpRateText = GetText((int)Texts.HpRateText);
         _cheerGuageText = GetText((int)Texts.CheerGuageText);
+
+        _dmgTextParent = transform.GetChild(0).Find(ConstValue.DmgTextParent);
         TextPooling();
 
         // 이미지 초기화
@@ -88,7 +91,7 @@ public class UI_BossPopUp : UI_PopUp
         _textLoadCount = 10;
         for (int i = 0; i < _dmgTexts.Length; i++)
         {
-            Managers.Resc.InstantiateByIdx(ConstValue.DmgText, i, transform, (op, idx) =>
+            Managers.Resc.InstantiateByIdx(ConstValue.DmgText, i, _dmgTextParent, (op, idx) =>
             {
                 _dmgTexts[idx] = op.GetComponent<TextMeshProUGUI>();
                 op.SetActive(false);

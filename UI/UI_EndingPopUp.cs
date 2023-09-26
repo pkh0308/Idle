@@ -19,6 +19,7 @@ public class UI_EndingPopUp : UI_PopUp
         BindButton(typeof(Buttons));
 
         Custom.GetOrAddComponent<UI_Base>(GetButton((int)Buttons.ExitBtn).gameObject).BindEvent(Btn_OnClickExit);
+        Managers.Sound.PlayBgm(SoundManager.Bgms.Sound_BossClear);
 
         return true;
     }

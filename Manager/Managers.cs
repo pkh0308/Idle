@@ -18,7 +18,7 @@ public class Managers : MonoBehaviour
     public static WfsManager Wfs { get { return wfsManager; } }
     public static AdvManager Adv { get { return advManager; } }
 
-    bool _initialized;
+    static bool _initialized;
     void Start()
     {
         if (_initialized)
