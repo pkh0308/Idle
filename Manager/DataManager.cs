@@ -1,121 +1,125 @@
+using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text;
 using System.Xml;
 using UnityEngine;
-using System;
 
 public class DataManager 
 {
-    const string Root = "root";
-    const string GameDataPath = "/XML/GameDatas.xml";
-    const string StageDataPath = "/XML/StageDatas.xml";
-    const string EnhanceDataPath = "/XML/EnhanceDatas.xml";
-    const string WeaponDataPath = "/XML/WeaponDatas.xml";
-    const string TreasureDataPath = "/XML/TreasureDatas.xml";
-    const string ShopDataPath = "/XML/ShopDatas.xml";
-    const string BossDataPath = "/XML/BossDatas.xml";
+    const string GameDataPath = "/GameData.json";
+
+    const string StageDataPath = "Data/StageDatas";
+    const string EnhanceDataPath = "Data/EnhanceDatas";
+    const string WeaponDataPath = "Data/WeaponDatas";
+    const string TreasureDataPath = "Data/TreasureDatas";
+    const string ShopDataPath = "Data/ShopDatas";
+    const string BossDataPath = "Data/BossDatas";
 
     public GameData CurGameData { get; private set; }
 
-    Dictionary<int, StageData> _stageDatas = new Dictionary<int, StageData>();
-    Dictionary<int, EnhanceData> _enhanceDatas = new Dictionary<int, EnhanceData>();
-    Dictionary<int, WeaponData> _weaponDatas = new Dictionary<int, WeaponData>();
-    Dictionary<int, TreasureData> _treasureDatas = new Dictionary<int, TreasureData>();
-    Dictionary<int, ShopData> _shopDatas = new Dictionary<int, ShopData>();
-    Dictionary<int, BossData> _bossDatas = new Dictionary<int, BossData>();
+    public Dictionary<int, StageData> StageDatas { get; private set; } = new Dictionary<int, StageData>();
+    public Dictionary<int, EnhanceData> EnhanceDatas { get; private set; } = new Dictionary<int, EnhanceData>();
+    public Dictionary<int, WeaponData> WeaponDatas { get; private set; } = new Dictionary<int, WeaponData>();
+    public Dictionary<int, TreasureData> TreasureDatas { get; private set; } = new Dictionary<int, TreasureData>();
+    public Dictionary<int, ShopData> ShopDatas { get; private set; } = new Dictionary<int, ShopData>();
+    public Dictionary<int, BossData> BossDatas { get; private set; } = new Dictionary<int, BossData>();
+
+    public int MaxStageIdx { get; private set; }
+
+    #region 초기화
+    // xml -> json 변환용 함수
+    void XmlToJson(string xmlPath, string jsonPath)
+    {
+        XmlDocument doc = new XmlDocument();
+        doc.Load(xmlPath);
+        string jsonString = JsonConvert.SerializeXmlNode(doc);
+
+        FileStream fileStream = new FileStream(jsonPath, FileMode.Create);
+        byte[] data = Encoding.UTF8.GetBytes(jsonString);
+        fileStream.Write(data, 0, data.Length);
+        fileStream.Close();
+    }
 
     public void Init()
     {
-        LoadGameData();
-        LoadStageData();
-        LoadEnhanceData();
-        LoadWeaponData();
-        LoadTreasureeData();
-        LoadShopData();
-        LoadBossData();
+        CurGameData = LoadSingleData<GameData>(GameDataPath);
+
+        StageDatas = LoadDatas<StageDataLoader, int, StageData>(StageDataPath).MakeDic();
+        EnhanceDatas = LoadDatas<EnhanceDataLoader, int, EnhanceData>(EnhanceDataPath).MakeDic(); 
+        WeaponDatas = LoadDatas<WeaponDataLoader, int, WeaponData>(WeaponDataPath).MakeDic(); 
+        TreasureDatas = LoadDatas<TreasureDataLoader, int, TreasureData>(TreasureDataPath).MakeDic();
+        ShopDatas = LoadDatas<ShopDataLoader, int, ShopData>(ShopDataPath).MakeDic(); 
+        BossDatas = LoadDatas<BossDataLoader, int, BossData>(BossDataPath).MakeDic();
+
+        MaxStageIdx = StageDatas.Count;
     }
+
+    Data LoadSingleData<Data>(string path)
+    {
+        if(File.Exists(Application.persistentDataPath + path) == false)
+        {
+            Debug.Log("### There is no GameData");
+            return default(Data);
+        }
+        string dataString = File.ReadAllText(Application.persistentDataPath + path);
+        return JsonUtility.FromJson<Data>(dataString);
+    }
+
+    Loader LoadDatas<Loader, Key, Value>(string path) where Loader : ILoader<Key, Value>
+    {
+        TextAsset textAsset = Resources.Load<TextAsset>(path);
+        return JsonUtility.FromJson<Loader>(textAsset.text);
+    }
+    #endregion
 
     #region GameData
-    public void LoadGameData()
-    {
-        //데이터를 형성할 문서 생성 및 파일읽기
-        XmlDocument doc = new XmlDocument();
-        string path = Application.dataPath + GameDataPath;
-        if (File.Exists(path) == false)
-        {
-            CurGameData = null;
-            return;
-        }
-
-        // 루트 설정
-        doc.Load(path);
-        XmlElement nodes = doc[Root];
-
-        foreach (XmlElement node in nodes.ChildNodes)
-        {
-            // 속성 읽어오기
-            int atkPowLv = Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.AtkPowLv.ToString()));
-            int atkSpeedLv = Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.AtkSpdLv.ToString()));
-            int critChanceLv = Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.CritChanceLv.ToString()));
-            int critDmgLv = Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.CritDmgLv.ToString()));
-            int goldUpLv = Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.GoldUpLv.ToString()));
-
-            int weaponLv = Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.WeaponLv.ToString()));
-
-            int tr_atkPowLv = Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.Treasure_AtkPowLv.ToString()));
-            int tr_atkSpeedLv = Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.Treasure_AtkSpdLv.ToString()));
-            int tr_critChanceLv = Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.Treasure_CritChanceLv.ToString()));
-            int tr_critDmgLv = Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.Treasure_CritDmgLv.ToString()));
-            int tr_goldUpLv = Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.Treasure_GoldUpLv.ToString()));
-
-            string nickname = node.GetAttribute(ConstValue.GameDataVal.NickName.ToString());
-            int curGold = Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.CurGold.ToString()));
-            int curGem = Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.CurGem.ToString()));
-            int stageIdx = Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.StageIdx.ToString()));
-
-            int lastYear = Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.LastAccessYear.ToString()));
-            int lastDayOfYear = Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.LastAccessDayOfYear.ToString()));
-            int lastMins = Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.LastAccessMinutes.ToString()));
-
-            int adCnt_Gold_2hr = Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.AdCount_Gold_2hr.ToString()));
-            int adCnt_Gem_100 = Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.AdCount_Gem_100.ToString()));
-
-            int bossLv = Convert.ToInt32(node.GetAttribute(ConstValue.GameDataVal.BossLv.ToString()));
-
-            //가져온 데이터 저장
-            GameData data = new GameData(atkPowLv, atkSpeedLv, critChanceLv, critDmgLv, goldUpLv, weaponLv,
-                                         tr_atkPowLv, tr_atkSpeedLv, tr_critChanceLv, tr_critDmgLv, tr_goldUpLv, 
-                                         nickname, curGold, curGem, stageIdx, lastYear, lastDayOfYear, lastMins,
-                                         adCnt_Gold_2hr, adCnt_Gem_100, bossLv);
-            CurGameData = data;
-        }
-    }
-
     public void SaveGameData()
     {
         if (CurGameData == null)
-        {
-            Debug.Log("There is no GameData");
             return;
-        }
 
-        XmlDocument doc = new XmlDocument();
-        XmlElement root = doc.CreateElement(Root);
-        doc.AppendChild(root);
+        string jsonString = JsonUtility.ToJson(CurGameData);
 
-        XmlElement element = doc.CreateElement("Data");
-        string[] names = Enum.GetNames(typeof(ConstValue.GameDataVal));
-        for (int i = 0; i < names.Length; i++)
-            element.SetAttribute(names[i], CurGameData.GetStringValue(i));
-        root.AppendChild(element);
-        
-        doc.Save(Application.dataPath + GameDataPath);
+        FileStream fileStream = new FileStream(Application.persistentDataPath + GameDataPath, FileMode.Create);
+        byte[] data = Encoding.UTF8.GetBytes(jsonString);
+        fileStream.Write(data, 0, data.Length);
+        fileStream.Close();
     }
 
     // 신규 게임데이터 생성
     public void CreateNewGameData(string nickname)
     {
-        GameData gameData = new GameData(nickname);
+        GameData gameData = new GameData()
+        {
+            AtkPowLv = 0,
+            AtkSpdLv = 0,
+            CritChanceLv = 0,
+            CritDmgLv = 0,
+            GoldUpLv = 0,
+
+            WeaponLv = 0,
+
+            Treasure_AtkPowLv = 0,
+            Treasure_AtkSpdLv = 0, 
+            Treasure_CritChanceLv = 0,
+            Treasure_CritDmgLv = 0,
+            Treasure_GoldUpLv = 0,
+
+            NickName = nickname,
+
+            CurGold = 0,
+            CurGem = 0,
+            StageIdx = 0,
+            LastAccessYear = -1,
+            LastAccessDayOfYear = -1,
+            LastAccessMinutes = -1,
+            AdCount_Gold_2hr = 0,
+            AdCount_Gem_100 = 0,
+
+            BossLv = 0,
+        };
         CurGameData = gameData;
     }
 
@@ -126,49 +130,11 @@ public class DataManager
     #endregion
 
     #region StageData
-    public int MaxStageIdx { get; private set; }
-    void LoadStageData()
-    {
-        //데이터를 형성할 문서 생성 및 파일읽기
-        XmlDocument doc = new XmlDocument();
-        string path = Application.dataPath + StageDataPath;
-        if (File.Exists(path) == false)
-        {
-            Debug.Log($"There is no StageDatas At {path}");
-            return;
-        }
-
-        // 루트 설정
-        doc.Load(path);
-        XmlElement nodes = doc[Root];
-        int idx = 0;
-        foreach (XmlElement node in nodes.ChildNodes)
-        {
-            // 속성 읽어오기
-            int hp = Convert.ToInt32(node.GetAttribute(ConstValue.StageDataVal.Hp.ToString()));
-            int enemyCount = Convert.ToInt32(node.GetAttribute(ConstValue.StageDataVal.EnemyCount.ToString()));
-            int minEnemyId = Convert.ToInt32(node.GetAttribute(ConstValue.StageDataVal.MinEnemyId.ToString()));
-            int maxEnemyId = Convert.ToInt32(node.GetAttribute(ConstValue.StageDataVal.MaxEnemyId.ToString()));
-            int dropGold = Convert.ToInt32(node.GetAttribute(ConstValue.StageDataVal.DropGold.ToString()));
-            int dropGem = Convert.ToInt32(node.GetAttribute(ConstValue.StageDataVal.DropGem.ToString()));
-
-            //가져온 데이터 저장
-            StageData data = new StageData(hp, enemyCount, minEnemyId, maxEnemyId, dropGold, dropGem);
-            _stageDatas.Add(idx, data);
-            idx++;
-        }
-        MaxStageIdx = _stageDatas.Count - 1;
-
-        // 클리어한 데이터라면 null처리
-        if (CurGameData != null && CurGameData.StageIdx > MaxStageIdx)
-            CurGameData = null;
-    }
-
     public StageData GetStageData(int stageIdx)
     {
-        if (_stageDatas.TryGetValue(stageIdx, out StageData sData) == false)
+        if (StageDatas.TryGetValue(stageIdx, out StageData sData) == false)
         {
-            Debug.Log($"Wrong Stage Idx: {stageIdx}");
+            Debug.Log($"### Wrong Stage Idx: {stageIdx}");
             return null;
         }
         return sData;
@@ -176,9 +142,9 @@ public class DataManager
 
     public int GetStageGold(int stageIdx)
     {
-        if(_stageDatas.TryGetValue(stageIdx, out StageData sData) == false)
+        if(StageDatas.TryGetValue(stageIdx, out StageData sData) == false)
         {
-            Debug.Log($"Wrong Stage Idx: {stageIdx}");
+            Debug.Log($"### Wrong Stage Idx: {stageIdx}");
             return 0;
         }
         return sData.DropGold;
@@ -186,56 +152,34 @@ public class DataManager
     #endregion
 
     #region EnhanceData
-    void LoadEnhanceData()
-    {
-        //데이터를 형성할 문서 생성 및 파일읽기
-        XmlDocument doc = new XmlDocument();
-        string path = Application.dataPath + EnhanceDataPath;
-        if (File.Exists(path) == false)
-        {
-            Debug.Log($"There is no EnhanceDatas At {path}");
-            return;
-        }
-
-        // 루트 설정
-        doc.Load(path);
-        XmlElement nodes = doc[Root];
-        int level = 0;
-        foreach (XmlElement node in nodes.ChildNodes)
-        {
-            // 속성 읽어오기
-            int atkPowCost = Convert.ToInt32(node.GetAttribute(ConstValue.EnhanceDataVal.AtkPowCost.ToString()));
-            int atkSpdCost = Convert.ToInt32(node.GetAttribute(ConstValue.EnhanceDataVal.AtkSpdCost.ToString()));
-            int critChanceCost = Convert.ToInt32(node.GetAttribute(ConstValue.EnhanceDataVal.CritChanceCost.ToString()));
-            int critDmgCost = Convert.ToInt32(node.GetAttribute(ConstValue.EnhanceDataVal.CritDmgCost.ToString()));
-            int goldUpCost = Convert.ToInt32(node.GetAttribute(ConstValue.EnhanceDataVal.GoldUpCost.ToString()));
-
-            int atkPowValue = Convert.ToInt32(node.GetAttribute(ConstValue.EnhanceDataVal.AtkPowValue.ToString()));
-            int atkSpdValue = Convert.ToInt32(node.GetAttribute(ConstValue.EnhanceDataVal.AtkSpdValue.ToString()));
-            int critChanceValue = Convert.ToInt32(node.GetAttribute(ConstValue.EnhanceDataVal.CritChanceValue.ToString()));
-            int critDmgValue = Convert.ToInt32(node.GetAttribute(ConstValue.EnhanceDataVal.CritDmgValue.ToString()));
-            int goldUpValue = Convert.ToInt32(node.GetAttribute(ConstValue.EnhanceDataVal.GoldUpValue.ToString()));
-
-            //가져온 데이터 저장
-            EnhanceData data = new EnhanceData(atkPowCost, atkSpdCost, critChanceCost, critDmgCost, goldUpCost,
-                                               atkPowValue, atkSpdValue, critChanceValue, critDmgValue, goldUpValue);
-            _enhanceDatas.Add(level, data);
-            level++;
-        }
-    }
-
     int GetEnahnceData(int idx, int level, bool isCost)
     {
-        if (_enhanceDatas.TryGetValue(level, out EnhanceData data) == false)
+        if (EnhanceDatas.TryGetValue(level, out EnhanceData data) == false)
         {
-            Debug.Log($"Wrong level for Enhance: {level}");
+            Debug.Log($"### Wrong Enhance Level: {level}");
             return -1;
         }
 
-        if(isCost)
-            return data.GetCost(idx);
-        else
-            return data.GetValue(idx);
+        int result = -1;
+        switch(idx)
+        {
+            case (int)ConstValue.Enhances.AtkPow:
+                result = isCost ? data.AtkPowCost : data.AtkPowValue;
+                break;
+            case (int)ConstValue.Enhances.AtkSpd:
+                result = isCost ? data.AtkSpdCost : data.AtkSpdValue;
+                break;
+            case (int)ConstValue.Enhances.CritChance:
+                result = isCost ? data.CritChanceCost : data.CritChanceValue;
+                break;
+            case (int)ConstValue.Enhances.CritDmg:
+                result = isCost ? data.CritDmgCost : data.CritDmgValue;
+                break;
+            case (int)ConstValue.Enhances.GoldUp:
+                result = isCost ? data.GoldUpCost : data.GoldUpValue;
+                break;
+        }
+        return result;
     }
 
     public int GetEnahnceCost(int idx, int level)  { return GetEnahnceData(idx, level, true); }
@@ -243,41 +187,11 @@ public class DataManager
     #endregion
 
     #region WeaponData
-    void LoadWeaponData()
-    {
-        //데이터를 형성할 문서 생성 및 파일읽기
-        XmlDocument doc = new XmlDocument();
-        string path = Application.dataPath + WeaponDataPath;
-        if (File.Exists(path) == false)
-        {
-            Debug.Log($"There is no WeaponDatas At {path}");
-            return;
-        }
-
-        // 루트 설정
-        doc.Load(path);
-        XmlElement nodes = doc[Root];
-        int level = 0;
-        foreach (XmlElement node in nodes.ChildNodes)
-        {
-            // 속성 읽어오기
-            int atkPow = Convert.ToInt32(node.GetAttribute(ConstValue.WeaponDataVal.AtkPower.ToString()));
-            int critChance = Convert.ToInt32(node.GetAttribute(ConstValue.WeaponDataVal.CritChance.ToString()));
-            int critDamage = Convert.ToInt32(node.GetAttribute(ConstValue.WeaponDataVal.CritDamage.ToString()));
-            int cost = Convert.ToInt32(node.GetAttribute(ConstValue.WeaponDataVal.Cost.ToString()));
-
-            //가져온 데이터 저장
-            WeaponData data = new WeaponData(atkPow, critChance, critDamage, cost);
-            _weaponDatas.Add(level, data);
-            level++;
-        }
-    }
-
     public WeaponData GetWeaponData(int weaponLv)
     {
-        if (_weaponDatas.TryGetValue(weaponLv, out WeaponData data) == false)
+        if (WeaponDatas.TryGetValue(weaponLv, out WeaponData data) == false)
         {
-            Debug.Log($"Wrong WeaponLv to buy: {weaponLv}");
+            Debug.Log($"### Wrong WeaponLv to buy: {weaponLv}");
             return null;
         }
         return data;
@@ -285,53 +199,34 @@ public class DataManager
     #endregion
 
     #region TreasureData
-    void LoadTreasureeData()
-    {
-        //데이터를 형성할 문서 생성 및 파일읽기
-        XmlDocument doc = new XmlDocument();
-        string path = Application.dataPath + TreasureDataPath;
-        if (File.Exists(path) == false)
-        {
-            Debug.Log($"There is no TreasureDatas At {path}");
-            return;
-        }
-
-        // 루트 설정
-        doc.Load(path);
-        XmlElement nodes = doc[Root];
-        int level = 0;
-        foreach (XmlElement node in nodes.ChildNodes)
-        {
-            // 속성 읽어오기
-            int atkPowCost = Convert.ToInt32(node.GetAttribute(ConstValue.TreasureDataVal.Tr_AtkPowCost.ToString()));
-            int atkSpdCost = Convert.ToInt32(node.GetAttribute(ConstValue.TreasureDataVal.Tr_AtkSpdCost.ToString()));
-            int critChanceCost = Convert.ToInt32(node.GetAttribute(ConstValue.TreasureDataVal.Tr_CritChanceCost.ToString()));
-            int critDmgCost = Convert.ToInt32(node.GetAttribute(ConstValue.TreasureDataVal.Tr_CritDmgCost.ToString()));
-            int goldUpCost = Convert.ToInt32(node.GetAttribute(ConstValue.TreasureDataVal.Tr_GoldUpCost.ToString()));
-
-            int atkPowValue = Convert.ToInt32(node.GetAttribute(ConstValue.TreasureDataVal.Tr_AtkPowValue.ToString()));
-            int atkSpdValue = Convert.ToInt32(node.GetAttribute(ConstValue.TreasureDataVal.Tr_AtkSpdValue.ToString()));
-            int critChanceValue = Convert.ToInt32(node.GetAttribute(ConstValue.TreasureDataVal.Tr_CritChanceValue.ToString()));
-            int critDmgValue = Convert.ToInt32(node.GetAttribute(ConstValue.TreasureDataVal.Tr_CritDmgValue.ToString()));
-            int goldUpValue = Convert.ToInt32(node.GetAttribute(ConstValue.TreasureDataVal.Tr_GoldUpValue.ToString()));
-
-            //가져온 데이터 저장
-            TreasureData data = new TreasureData(atkPowCost, atkSpdCost, critChanceCost, critDmgCost, goldUpCost,
-                                                 atkPowValue, atkSpdValue, critChanceValue, critDmgValue, goldUpValue);
-            _treasureDatas.Add(level, data);
-            level++;
-        }
-    }
-
     int GetTreasureData(int idx, int level, bool isCost)
     {
-        if (_treasureDatas.TryGetValue(level, out TreasureData data) == false)
+        if (TreasureDatas.TryGetValue(level, out TreasureData data) == false)
         {
-            Debug.Log($"Wrong level for Treasure: {level}");
+            Debug.Log($"### Wrong level for Treasure: {level}");
             return -1;
         }
 
-        return isCost ? data.GetCost(idx) : data.GetValue(idx);
+        int result = -1;
+        switch (idx)
+        {
+            case (int)ConstValue.Treasures.Tr_AtkPow:
+                result = isCost ? data.Tr_AtkPowCost : data.Tr_AtkPowValue;
+                break;
+            case (int)ConstValue.Treasures.Tr_AtkSpd:
+                result = isCost ? data.Tr_AtkSpdCost : data.Tr_AtkSpdValue;
+                break;
+            case (int)ConstValue.Treasures.Tr_CritChance:
+                result = isCost ? data.Tr_CritChanceCost : data.Tr_CritChanceValue;
+                break;
+            case (int)ConstValue.Treasures.Tr_CritDmg:
+                result = isCost ? data.Tr_CritDmgCost : data.Tr_CritDmgValue;
+                break;
+            case (int)ConstValue.Treasures.Tr_GoldUp:
+                result = isCost ? data.Tr_GoldUpCost : data.Tr_GoldUpValue;
+                break;
+        }
+        return result;
     }
 
     public int GetTreasureCost(int idx, int level) { return GetTreasureData(idx, level, true); }
@@ -339,19 +234,58 @@ public class DataManager
 
     string GetTreasureByString(int level, int idx = -1)
     {
-        if (_treasureDatas.TryGetValue(level, out TreasureData data) == false)
+        if (TreasureDatas.TryGetValue(level, out TreasureData data) == false)
         {
-            Debug.Log($"Wrong level for Treasure: {level}");
+            Debug.Log($"### Wrong Treasure Level: {level}");
             return null;
         }
 
         // 최고 레벨일 경우
-        if (_treasureDatas.TryGetValue(level + 1, out TreasureData nextData) == false)
-            return idx < 0 ? ConstValue.Max : $"{data.GetValue(idx) / 100}%";
+        if (TreasureDatas.TryGetValue(level + 1, out TreasureData nextData) == false)
+        {
+            // 레벨
+            if (idx < 0)
+                return ConstValue.Max;
+            // 수치
+            switch (idx)
+            {
+                case (int)ConstValue.Treasures.Tr_AtkPow:
+                    return $"{data.Tr_AtkPowValue / 100}%";
+                case (int)ConstValue.Treasures.Tr_AtkSpd:
+                    return $"{data.Tr_AtkSpdValue / 100}%";
+                case (int)ConstValue.Treasures.Tr_CritChance:
+                    return $"{data.Tr_CritChanceValue / 100}%";
+                case (int)ConstValue.Treasures.Tr_CritDmg:
+                    return $"{data.Tr_CritDmgValue / 100}%";
+                case (int)ConstValue.Treasures.Tr_GoldUp:
+                    return $"{data.Tr_GoldUpValue / 100}%";
+                default:
+                    Debug.Log($"### Wrong Treasure Idx: {idx}");
+                    return null;
+            }
+        }
 
-        // 최고 레벨이 아닐 경우
-        // 다음 레벨 정보 노출
-        return idx < 0 ? (level + 1).ToString() : $"{nextData.GetValue(idx) / 100}%";
+        // 최고 레벨이 아닐 경우 다음 레벨 정보 노출
+        // 레벨
+        if (idx < 0)
+            return (level + 1).ToString();
+        // 수치
+        switch (idx)
+        {
+            case (int)ConstValue.Treasures.Tr_AtkPow:
+                return $"{nextData.Tr_AtkPowValue / 100}%";
+            case (int)ConstValue.Treasures.Tr_AtkSpd:
+                return $"{nextData.Tr_AtkSpdValue / 100}%";
+            case (int)ConstValue.Treasures.Tr_CritChance:
+                return $"{nextData.Tr_CritChanceValue / 100}%";
+            case (int)ConstValue.Treasures.Tr_CritDmg:
+                return $"{nextData.Tr_CritDmgValue / 100}%";
+            case (int)ConstValue.Treasures.Tr_GoldUp:
+                return $"{nextData.Tr_GoldUpValue / 100}%";
+            default:
+                Debug.Log($"### Wrong Treasure Idx: {idx}");
+                return null;
+        }
     }
 
     public string GetTrLevelByStr(int level) { return GetTreasureByString(level); }
@@ -359,42 +293,11 @@ public class DataManager
     #endregion
 
     #region ShopData
-    void LoadShopData()
-    {
-        //데이터를 형성할 문서 생성 및 파일읽기
-        XmlDocument doc = new XmlDocument();
-        string path = Application.dataPath + ShopDataPath;
-        if (File.Exists(path) == false)
-        {
-            Debug.Log($"There is no ShopDatas At {path}");
-            return;
-        }
-
-        // 루트 설정
-        doc.Load(path);
-        XmlElement nodes = doc[Root];
-        int idx = 0;
-        foreach (XmlElement node in nodes.ChildNodes)
-        {
-            // 속성 읽어오기
-            string name = node.GetAttribute(ConstValue.ShopDataVal.Name.ToString());
-            int cost = Convert.ToInt32(node.GetAttribute(ConstValue.ShopDataVal.Cost.ToString()));
-            int maxCount = Convert.ToInt32(node.GetAttribute(ConstValue.ShopDataVal.MaxCount.ToString()));
-            int goodsType = Convert.ToInt32(node.GetAttribute(ConstValue.ShopDataVal.GoodsType.ToString()));
-            int goodsValue = Convert.ToInt32(node.GetAttribute(ConstValue.ShopDataVal.GoodsValue.ToString()));
-
-            //가져온 데이터 저장
-            ShopData data = new ShopData(name, cost, maxCount, goodsType, goodsValue);
-            _shopDatas.Add(idx, data);
-            idx++;
-        }
-    }
-
     public ShopData GetShopData(int idx)
     {
-        if(_shopDatas.TryGetValue(idx, out ShopData data) == false)
+        if(ShopDatas.TryGetValue(idx, out ShopData data) == false)
         {
-            Debug.Log($"Wrong idx to buy: {idx}");
+            Debug.Log($"### Wrong shopItem idx: {idx}");
             return null;
         }
         return data;
@@ -402,43 +305,13 @@ public class DataManager
     #endregion
 
     #region BossData
-    void LoadBossData()
+    public BossData GetBossData(int idx)
     {
-        //데이터를 형성할 문서 생성 및 파일읽기
-        XmlDocument doc = new XmlDocument();
-        string path = Application.dataPath + BossDataPath;
-        if (File.Exists(path) == false)
-        {
-            Debug.Log($"There is no BossDatas At {path}");
-            return;
-        }
+        int[] keys = BossDatas.Keys.ToArray();
 
-        // 루트 설정
-        doc.Load(path);
-        XmlElement nodes = doc[Root];
-        int idx = 0;
-        foreach (XmlElement node in nodes.ChildNodes)
+        if (BossDatas.TryGetValue(keys[idx], out BossData bData) == false)
         {
-            // 속성 읽어오기
-            int hp = Convert.ToInt32(node.GetAttribute(ConstValue.BossDataVal.Hp.ToString()));
-            int id = Convert.ToInt32(node.GetAttribute(ConstValue.BossDataVal.BossId.ToString()));
-            string name = node.GetAttribute(ConstValue.BossDataVal.BossName.ToString());
-            int timeLimit = Convert.ToInt32(node.GetAttribute(ConstValue.BossDataVal.TimeLimit.ToString()));
-            int dropGold = Convert.ToInt32(node.GetAttribute(ConstValue.BossDataVal.DropGold.ToString()));
-            int dropGem = Convert.ToInt32(node.GetAttribute(ConstValue.BossDataVal.DropGem.ToString()));
-
-            //가져온 데이터 저장
-            BossData data = new BossData(hp, id, name, timeLimit, dropGold, dropGem);
-            _bossDatas.Add(idx, data);
-            idx++;
-        }
-    }
-
-    public BossData GetBossData(int bossIdx)
-    {
-        if (_bossDatas.TryGetValue(bossIdx, out BossData bData) == false)
-        {
-            Debug.Log($"Wrong Boss Idx: {bossIdx}");
+            Debug.Log($"### Wrong Boss Idx: {idx}");
             return null;
         }
         return bData;

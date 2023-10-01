@@ -31,25 +31,22 @@ public class AdvManager
             _rewardedAd = null;
         }
 
-        // create our request used to load the ad.
+        // 광고 요청용 AdRequest 생성
         AdRequest adRequest = new AdRequest();
         adRequest.Keywords.Add("unity-admob-sample");
 
-        // send the request to load the ad.
+        // 광고 로드 요청 전송
         RewardedAd.Load(TEST_ANDROID_REWARDED, adRequest, (RewardedAd ad, LoadAdError error) =>
         {
-            // if error is not null, the load request failed.
+            // error가 null이 아니라면 로드 실패
             if (error != null || ad == null)
             {
                 Debug.LogError("Rewarded ad failed to load an ad with error : " + error);
                 return;
             }
-            Debug.Log("Rewarded ad loaded with response : " + ad.GetResponseInfo());
-
             _rewardedAd = ad;
+            PrepareAds();
         });
-
-        PrepareAds();
     }
 
     void PrepareAds()
@@ -66,33 +63,34 @@ public class AdvManager
     #region 콜백
     public void HandleOnAdImpressionRecorded()
     {
-        
+        Debug.Log("### AdImpressionRecorded");
     }
 
     public void HandleOnAdClicked()
     {
-        
+        Debug.Log("### AdClicked");
     }
 
     public void HandleOnAdFullScreenContentOpened()
     {
-        
+        Debug.Log("### AdFullScreenContentOpened");
     }
 
     public void HandleOnAdFullScreenContentClosed()
     {
+        Debug.Log("### AdFullScreenContentClosed");
         LoadRewardedAd();
         Managers.Game.PlusAdCount(_curAdIdx);
     }
 
     public void HandleOnAdFullScreenContentFailed(AdError error)
     {
-        
+        Debug.Log("### AdFullScreenContentFailed");
     }
 
     public void HandleOnAdPaid(AdValue value)
     {
-        
+        Debug.Log("### AdPaid");
     }
     #endregion
 

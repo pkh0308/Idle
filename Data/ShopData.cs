@@ -1,19 +1,30 @@
 // 상점 상품 데이터 저장용
 // MaxCount가 -1이라면 광고 시청 상품
+using System;
+using System.Collections.Generic;
+
+[Serializable]
 public class ShopData
 {
-    public readonly string Name;
-    public readonly int Cost;
-    public readonly int MaxCount;
-    public readonly int GoodsType;
-    public readonly int GoodsValue;
+    public int Id;
+    public string Name;
+    public int Cost;
+    public int MaxCount;
+    public int GoodsType;
+    public int GoodsValue;
+}
 
-    public ShopData(string Name, int Cost, int MaxCount, int GoodsType, int GoodsValue)
+[Serializable]
+public class ShopDataLoader : ILoader<int, ShopData>
+{
+    public List<ShopData> ShopDatas = new List<ShopData>();
+
+    public Dictionary<int, ShopData> MakeDic()
     {
-        this.Name = Name;
-        this.Cost = Cost;
-        this.MaxCount = MaxCount;
-        this.GoodsType = GoodsType;
-        this.GoodsValue = GoodsValue;
+        Dictionary<int, ShopData> dic = new Dictionary<int, ShopData>();
+        foreach (ShopData data in ShopDatas)
+            dic.Add(data.Id, data);
+
+        return dic;
     }
 }

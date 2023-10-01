@@ -104,10 +104,35 @@ public class GameManager
         LastAccessDayOfYear = DateTime.Now.DayOfYear;
         LastAccessMinutes = (DateTime.Now.Hour * ConstValue.Minutes) + DateTime.Now.Minute;
 
-        GameData data = new GameData(AtkPowerLv, AtkSpeedLv, CritChanceLv, CritDamageLv, GoldUpLv, WeaponLv,
-                                     Tr_AtkPowerLv, Tr_AtkSpeedLv, Tr_CritChanceLv, Tr_CritDamageLv, Tr_GoldUpLv,
-                                     NickName, CurGold, CurGem, CurStageIdx, LastAccessYear, LastAccessDayOfYear, LastAccessMinutes, 
-                                     AdCount_Gold_2hr, AdCount_Gem_100, BossLv);
+        GameData data = new GameData()
+        {
+            AtkPowLv = AtkPowerLv,
+            AtkSpdLv = AtkSpeedLv,
+            CritChanceLv = CritChanceLv,
+            CritDmgLv = CritDamageLv,
+            GoldUpLv = GoldUpLv,
+
+            WeaponLv = WeaponLv,
+
+            Treasure_AtkPowLv = Tr_AtkPowerLv,
+            Treasure_AtkSpdLv = Tr_AtkSpeedLv,
+            Treasure_CritChanceLv = Tr_CritChanceLv,
+            Treasure_CritDmgLv = Tr_CritDamageLv,
+            Treasure_GoldUpLv = Tr_GoldUpLv,
+
+            NickName = this.NickName,
+
+            CurGold = this.CurGold,
+            CurGem = this.CurGem,
+            StageIdx = this.CurStageIdx,
+            LastAccessYear = this.LastAccessYear,
+            LastAccessDayOfYear = this.LastAccessDayOfYear,
+            LastAccessMinutes = this.LastAccessMinutes,
+            AdCount_Gold_2hr = this.AdCount_Gold_2hr,
+            AdCount_Gem_100 = this.AdCount_Gem_100,
+
+            BossLv = this.BossLv,
+        };
         Managers.Data.SetGameData(data);
     }
     #endregion
@@ -124,7 +149,7 @@ public class GameManager
 
     public bool LoadGame()
     {
-        if (Managers.Data.CurGameData == null)
+        if (Managers.Data.CurGameData == null || Managers.Data.CurGameData.NickName == null)
             return false;
 
         // 클리어 데이터라면 없는 것으로 취급
@@ -239,11 +264,11 @@ public class GameManager
         float tr_critDmg = 1 + Managers.Data.GetTreasureValue((int)ConstValue.Treasures.Tr_CritDmg, Tr_CritDamageLv) / 10000.0f;
         float tr_goldUp = 1 + Managers.Data.GetTreasureValue((int)ConstValue.Treasures.Tr_GoldUp, Tr_GoldUpLv) / 10000.0f;
 
-        _atkPow = (int)((Managers.Data.GetEnahnceValue((int)ConstValue.Enhances.AtkPow, AtkPowerLv) + wData.AtkPower) * tr_atkPow);
+        _atkPow = (int)((Managers.Data.GetEnahnceValue((int)ConstValue.Enhances.AtkPow, AtkPowerLv) + wData.AtkPower) * tr_atkPow); 
         _atkSpd = (int)(Managers.Data.GetEnahnceValue((int)ConstValue.Enhances.AtkSpd, AtkSpeedLv) * tr_atkSpd);
-        _critChance = (int)((Managers.Data.GetEnahnceValue((int)ConstValue.Enhances.CritChance, CritChanceLv) + wData.CritChance) * tr_critChance);
-        _critDmg = (int)((Managers.Data.GetEnahnceValue((int)ConstValue.Enhances.CritDmg, CritDamageLv) + wData.CritDamage) * tr_critDmg);
-        _goldUp = (int)(Managers.Data.GetEnahnceValue((int)ConstValue.Enhances.GoldUp, GoldUpLv) * tr_goldUp);
+        _critChance = (int)((Managers.Data.GetEnahnceValue((int)ConstValue.Enhances.CritChance, CritChanceLv) + wData.CritChance) * tr_critChance); 
+        _critDmg = (int)((Managers.Data.GetEnahnceValue((int)ConstValue.Enhances.CritDmg, CritDamageLv) + wData.CritDamage) * tr_critDmg); 
+        _goldUp = (int)(Managers.Data.GetEnahnceValue((int)ConstValue.Enhances.GoldUp, GoldUpLv) * tr_goldUp); 
     }
 
     public int CurEnemyCount { get; private set; }

@@ -1,20 +1,29 @@
 // 보스 데이터 저장용
+using System;
+using System.Collections.Generic;
+
+[Serializable]
 public class BossData
 {
-    public readonly int Hp;
-    public readonly int BossId;
-    public readonly string BossName;
-    public readonly int TimeLimit;
-    public readonly int DropGold;
-    public readonly int DropGem;
+    public int BossId;
+    public string BossName;
+    public int Hp;
+    public int TimeLimit;
+    public int DropGold;
+    public int DropGem;
+}
 
-    public BossData(int hp, int id, string name, int timeLimit, int gold, int gem)
+[Serializable]
+public class BossDataLoader : ILoader<int, BossData>
+{
+    public List<BossData> BossDatas = new List<BossData>();
+
+    public Dictionary<int, BossData> MakeDic()
     {
-        Hp = hp;
-        BossId = id;
-        BossName = name;
-        TimeLimit = timeLimit;
-        DropGold = gold;
-        DropGem = gem;
+        Dictionary<int, BossData> dic = new Dictionary<int, BossData>();
+        foreach (BossData data in BossDatas)
+            dic.Add(data.BossId, data);
+
+        return dic;
     }
 }
