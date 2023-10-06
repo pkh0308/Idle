@@ -47,10 +47,6 @@ public class UI_MainPopUp : UI_PopUp
         WeaponBtn,
         TreasureBtn,
         ShopBtn,
-        UI_EnhancePopUp,
-        UI_WeaponPopUp,
-        UI_TreasurePopUp,
-        UI_ShopPopUp,
         GoldIcon,
         GemIcon,
         BlackScene
@@ -127,10 +123,11 @@ public class UI_MainPopUp : UI_PopUp
         _shopBtn = GetImage((int)Images.ShopBtn);
 
         _mainPopUps = new GameObject[NumOfMenus];
-        _mainPopUps[(int)Menus.Enhance] = GetImage((int)Images.UI_EnhancePopUp).gameObject;
-        _mainPopUps[(int)Menus.Weapon] = GetImage((int)Images.UI_WeaponPopUp).gameObject;
-        _mainPopUps[(int)Menus.Treasure] = GetImage((int)Images.UI_TreasurePopUp).gameObject;
-        _mainPopUps[(int)Menus.Shop] = GetImage((int)Images.UI_ShopPopUp).gameObject;
+        Transform menus = transform.GetChild(0).Find(ConstValue.MenusParent);
+        Managers.Resc.InstantiateByIdx(nameof(UI_EnhancePopUp), (int)Menus.Enhance, menus, (obj, idx) => { _mainPopUps[idx] = obj; CountMenuLoad(); });
+        Managers.Resc.InstantiateByIdx(nameof(UI_WeaponPopUp), (int)Menus.Weapon, menus, (obj, idx) => { _mainPopUps[idx] = obj; CountMenuLoad(); });
+        Managers.Resc.InstantiateByIdx(nameof(UI_TreasurePopUp), (int)Menus.Treasure, menus, (obj, idx) => { _mainPopUps[idx] = obj; CountMenuLoad(); });
+        Managers.Resc.InstantiateByIdx(nameof(UI_ShopPopUp), (int)Menus.Shop, menus, (obj, idx) => { _mainPopUps[idx] = obj; CountMenuLoad(); });
 
         _front = GetImage((int)Images.Field01);
         _back = GetImage((int)Images.Field02);
@@ -154,7 +151,6 @@ public class UI_MainPopUp : UI_PopUp
         UpdateGoldGem();
         UpdateStageText();
         InitialSetActiveFalse();
-        Managers.Game.SetCallBackForGoods(UpdateGoldGem);
         // 이동 & 전투 초기화
         InitStage();
         StartCoroutine(Idle());
@@ -168,8 +164,17 @@ public class UI_MainPopUp : UI_PopUp
     void InitialSetActiveFalse()
     { 
         _hpBarBg.gameObject.SetActive(false);
+    }
+
+    int _mCount = 0;
+    void CountMenuLoad()
+    {
+        _mCount++;
+        if (_mCount < NumOfMenus)
+            return;
+
         // 첫번째 메뉴(강화) 외 비활성화
-        for(int i = 1; i < NumOfMenus; i++)
+        for (int i = 1; i < NumOfMenus; i++)
             _mainPopUps[i].SetActive(false);
     }
 
@@ -184,6 +189,20 @@ public class UI_MainPopUp : UI_PopUp
                 op.SetActive(false);
             });
         }
+    }
+    #endregion
+
+    #region Update
+    int _befGold;
+    int _befGem;
+    void Update()
+    {
+        if (_befGold == Managers.Game.CurGold && _befGem == Managers.Game.CurGem)
+            return;
+
+        UpdateGoldGem();
+        _befGold = Managers.Game.CurGold;
+        _befGem = Managers.Game.CurGem;
     }
     #endregion
 
@@ -406,7 +425,6 @@ public class UI_MainPopUp : UI_PopUp
 
     IEnumerator OnNextStage()
     {
-        UpdateStageText();
         curState = State.StageChange;
         _blackScene.gameObject.SetActive(true);
         _hpBarBg.gameObject.SetActive(false);
@@ -414,6 +432,7 @@ public class UI_MainPopUp : UI_PopUp
         yield return Managers.Wfs.GetWaitForSeconds(ConstValue.StageChangeTime / 2);
 
         RemoveField();
+        UpdateStageText();
         yield return Managers.Wfs.GetWaitForSeconds(ConstValue.StageChangeTime / 2);
 
         _blackScene.gameObject.SetActive(false);

@@ -20,11 +20,6 @@ public class UI_BossTryPopUp : UI_PopUp
 
     enum Buttons
     {
-        Boss_01Btn,
-        Boss_02Btn, 
-        Boss_03Btn,
-        Boss_04Btn,
-        Boss_05Btn,
         BossTryBtn,
         ExitBtn
     }
@@ -60,11 +55,6 @@ public class UI_BossTryPopUp : UI_PopUp
             _bossBtnTexts[idx].text = $"난이도 {idx + 1}: {Managers.Data.GetBossData(idx).BossName}";
         }
 
-        Custom.GetOrAddComponent<UI_Base>(GetButton((int)Buttons.Boss_01Btn).gameObject).BindEvent(Btn_OnClickBoss_01);
-        Custom.GetOrAddComponent<UI_Base>(GetButton((int)Buttons.Boss_02Btn).gameObject).BindEvent(Btn_OnClickBoss_02);
-        Custom.GetOrAddComponent<UI_Base>(GetButton((int)Buttons.Boss_03Btn).gameObject).BindEvent(Btn_OnClickBoss_03);
-        Custom.GetOrAddComponent<UI_Base>(GetButton((int)Buttons.Boss_04Btn).gameObject).BindEvent(Btn_OnClickBoss_04);
-        Custom.GetOrAddComponent<UI_Base>(GetButton((int)Buttons.Boss_05Btn).gameObject).BindEvent(Btn_OnClickBoss_05);
         Custom.GetOrAddComponent<UI_Base>(GetButton((int)Buttons.BossTryBtn).gameObject).BindEvent(Btn_OnClickBossTry);
         Custom.GetOrAddComponent<UI_Base>(GetButton((int)Buttons.ExitBtn).gameObject).BindEvent(Btn_OnClickExit);
 
@@ -84,17 +74,17 @@ public class UI_BossTryPopUp : UI_PopUp
         int level = Managers.Game.BossLv;
         for (int i = 0; i < BossCount; i++)
         {
-            if(i < level)
+            if(i < level) // 이미 잡은 보스
             {
                 _lockImgs[i].gameObject.SetActive(false);
                 _clearImgs[i].gameObject.SetActive(true);
             }
-            else if(i > level)
+            else if(i > level) // 아직 잡을 수 없는 보스
             {
                 _lockImgs[i].gameObject.SetActive(true);
                 _clearImgs[i].gameObject.SetActive(false);
             }
-            else
+            else // 현재 도전 가능한 보스
             {
                 _lockImgs[i].gameObject.SetActive(false);
                 _clearImgs[i].gameObject.SetActive(false);
@@ -104,24 +94,10 @@ public class UI_BossTryPopUp : UI_PopUp
     #endregion
 
     #region 버튼
-    int _curBossId = -1;
-
-    public void Btn_OnClickBoss_01() { _curBossId = (int)Buttons.Boss_01Btn; }
-    public void Btn_OnClickBoss_02() { _curBossId = (int)Buttons.Boss_02Btn; }
-    public void Btn_OnClickBoss_03() { _curBossId = (int)Buttons.Boss_03Btn; }
-    public void Btn_OnClickBoss_04() { _curBossId = (int)Buttons.Boss_04Btn; }
-    public void Btn_OnClickBoss_05() { _curBossId = (int)Buttons.Boss_05Btn; }
 
     public void Btn_OnClickBossTry() 
     { 
-        // ToDo: 보스 씬 입장
-        if(_curBossId < 0)
-        {
-            Managers.UI.OpenNotice(ConstValue.Notice_NotSelectBoss);
-            return;
-        }
-
-        Managers.Game.EnterBossTry(_curBossId);
+        Managers.Game.EnterBossTry();
     }
 
     public void Btn_OnClickExit()

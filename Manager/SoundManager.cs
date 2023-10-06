@@ -82,7 +82,7 @@ public class SoundManager
     // 로드 완료 후에 실행할 내용 생기면 추가
     void OnLoadCompleted()
     {
-
+        
     }
     #endregion
 
@@ -99,6 +99,11 @@ public class SoundManager
     void Play(AudioType audioType, Type type, int idx, float amplifier = 1.0f)
     {
         AudioClip clip = _audioClips[type][idx];
+        if (clip == null)
+        {
+            LoadAndPlay(audioType, type, idx, amplifier);
+            return;
+        }
         AudioSource source = _sources[audioType.ToString()];
 
         switch (audioType)
@@ -112,6 +117,28 @@ public class SoundManager
                 source.PlayOneShot(clip);
                 break;
         }
+    }
+
+    void LoadAndPlay(AudioType audioType, Type type, int idx, float amplifier)
+    {
+        string key = Enum.GetNames(type)[idx];
+        AudioSource source = _sources[audioType.ToString()];
+
+        Managers.Resc.Load<AudioClip>(key, (clip) =>
+        {
+            switch (audioType)
+            {
+                case AudioType.Bgm:
+                    source.clip = clip;
+                    source.Play();
+                    break;
+                case AudioType.Sfx:
+                    source.volume = _sfxVolume * amplifier;
+                    source.PlayOneShot(clip);
+                    break;
+            }
+            _audioClips[type][idx] = clip;
+        });
     }
 
     public void StopBgm()

@@ -2,7 +2,7 @@ using UnityEngine;
 using GoogleMobileAds.Api;
 using System;
 
-public class AdvManager
+public class AdManager
 {
     RewardedAd _rewardedAd;
 
@@ -15,9 +15,17 @@ public class AdvManager
     const string ANDROID_APP_ID = "";
     const string IOS_APP_ID = "";
 
+    public bool AdPaid { get; private set; } = false;
+    Action _rewardCallback;
+
     #region 초기화
     public void Init()
     {
+        // 보상 수령용 오브젝트 생성
+        GameObject rewardReceiver = new GameObject() { name = "AdRewardReceiver" };
+        UnityEngine.Object.DontDestroyOnLoad(rewardReceiver);
+        rewardReceiver.AddComponent<RewardReceiver>();
+
         MobileAds.Initialize(initStatus => { });
         LoadRewardedAd();
     }
@@ -91,6 +99,7 @@ public class AdvManager
     public void HandleOnAdPaid(AdValue value)
     {
         Debug.Log("### AdPaid");
+        AdPaid = true;
     }
     #endregion
 
@@ -104,7 +113,7 @@ public class AdvManager
         int curCount = Managers.Game.GetAdCount((int)targetAd);
         if(curCount < 0)
         {
-            Debug.Log("Wrong Ad Count");
+            Debug.Log("### Wrong Ad Count");
             return false;
         }
 
@@ -113,16 +122,32 @@ public class AdvManager
     }
 
     // Reward 광고 시청
-    public void ShowRewardedAds(Action<Reward> rewardedCallback)
+    public void ShowRewardedAds(Action rewardCallback, Action<Reward> rewardEarnedCallback = null)
     {
         if (_rewardedAd != null && _rewardedAd.CanShowAd())
-            _rewardedAd.Show(rewardedCallback);
+        {
+            _rewardCallback = rewardCallback;
+            _rewardedAd.Show(rewardEarnedCallback);
+        }
         else
         {
             Managers.UI.OpenNotice(ConstValue.Notice_AdNotPrepared);
             LoadRewardedAd();
         }
             
+    }
+
+    // 유니티 Admob 관련 이슈로 인해 Receiver의 Update에서 체크 후 보상 지급
+    // - 광고 시청은 메인 스레드가 아닌 다른 스레드에서 실행
+    // - 그런데 보상 지급은 광고를 닫기 전에 실행됨
+    // - 결과, Admob의 콜백 기능을 이용해 보상 수령 시 UnityException 발생(### can only be called from the main thread.)
+    public void GetReward()
+    {
+        // 보상 지급
+        _rewardCallback?.Invoke();
+        // 초기화
+        AdPaid = false;
+        _rewardCallback = null;
     }
     #endregion
 }

@@ -1,5 +1,5 @@
+using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using UnityEngine;
 
 public class UIManager 
@@ -14,11 +14,12 @@ public class UIManager
 
     // 씬의 기본이 되는 UI(캔버스 포함) 오픈
     // 공지 팝업을 띄울 _baseTransform을 해당 객체의 트랜스폼으로 설정
-    public void OpenScene<T>() where T: UI_PopUp
+    public void OpenScene<T>(Action callback = null) where T: UI_PopUp
     {
         Managers.Resc.Instantiate(typeof(T).Name, null, (op) => {
             _baseTransform = op.transform;
             Custom.GetOrAddComponent<T>(op);
+            callback?.Invoke();
         });
     }
 
@@ -63,15 +64,15 @@ public class UIManager
             Debug.Log("There is another PopUp on top");
             return;
         }
-        Object.Destroy(_stack.Pop().gameObject);
+        UnityEngine.Object.Destroy(_stack.Pop().gameObject);
     }
 
     public bool ClosePopUp()
     {
         if (_stack.Count == 0)
             return false;
-        
-        Object.Destroy(_stack.Pop().gameObject);
+
+        UnityEngine.Object.Destroy(_stack.Pop().gameObject);
         return true;
     }
 

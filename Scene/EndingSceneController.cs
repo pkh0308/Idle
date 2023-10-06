@@ -1,16 +1,21 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class EndingSceneController : SceneController
 {
+    GameObject _loadingScreen;
+
     protected override bool Init()
     {
         if (base.Init() == false)
             return false;
 
         _initialized = true;
-        Managers.UI.OpenScene<UI_EndingPopUp>();
+        _loadingScreen = GameObject.Find(ConstValue.LoadingScreen);
+
+        Managers.UI.OpenScene<UI_EndingPopUp>(() =>
+        {
+            Destroy(_loadingScreen);
+        });
         return true;
     }
 }

@@ -128,6 +128,7 @@ public class GameManager
             LastAccessYear = this.LastAccessYear,
             LastAccessDayOfYear = this.LastAccessDayOfYear,
             LastAccessMinutes = this.LastAccessMinutes,
+
             AdCount_Gold_2hr = this.AdCount_Gold_2hr,
             AdCount_Gem_100 = this.AdCount_Gem_100,
 
@@ -188,10 +189,6 @@ public class GameManager
     #endregion
 
     #region 재화 획득 & 소모
-    Action _goleGemUpdate = null;
-    public void SetCallBackForGoods(Action callback) { _goleGemUpdate = callback; }
-    void UpdateGoldGem() { _goleGemUpdate?.Invoke(); }
-
     bool Purchase(ConstValue.Goods type, int value)
     {
         int temp = 0;
@@ -209,36 +206,28 @@ public class GameManager
         else if (type == ConstValue.Goods.Gem)
             CurGem = temp;
 
-        UpdateGoldGem();
         return true;
     }
 
     public int GetGold(int value) 
     { 
         CurGold += value;
-        UpdateGoldGem();
         return CurGold; 
     }
     public int GetGem(int value) 
     { 
         CurGem += value; 
-        UpdateGoldGem(); 
         return CurGem; 
     }
 
-    // 오프라인 보상(1분당)
-    public int GetRewardPerMinute() { return _stageData.DropGold; }
-    public void GetGoldPerHour(int hour) { GetGold(_stageData.DropGold * 60 * hour); }
-
-    public int GetOfflineReward(out int minutes)
+    public int GetOfflineReward(out int min)
     {
         int year = DateTime.Now.Year - LastAccessYear;
         int day = (DateTime.Now.DayOfYear + (year * ConstValue.Days)) - LastAccessDayOfYear;
-        int min = (day * ConstValue.Hours * ConstValue.Minutes) + (DateTime.Now.Hour * ConstValue.Minutes + DateTime.Now.Minute) - LastAccessMinutes;
-        minutes = min;
+        min = (day * ConstValue.Hours * ConstValue.Minutes) + (DateTime.Now.Hour * ConstValue.Minutes + DateTime.Now.Minute) - LastAccessMinutes;
         LastAccessMinutes = 0; // 오프라인 보상 중복 수령 방지
 
-        int offlineRwd = min * GetRewardPerMinute();
+        int offlineRwd = min * _stageData.DropGold;
         GetGold(offlineRwd);
         return offlineRwd;
     }
@@ -335,7 +324,7 @@ public class GameManager
         int cost = Managers.Data.GetEnahnceCost(idx, level);
         if(cost < 0)
         {
-            Debug.Log($"Wrong Enhance idx or level: {idx}, {level}");
+            Debug.Log($"### Wrong Enhance idx or level: {idx}, {level}");
             return false;
         }
 
@@ -381,7 +370,7 @@ public class GameManager
         WeaponData wData = Managers.Data.GetWeaponData(level);
         if (wData == null)
         {
-            Debug.Log($"Wrong weaponLv to buy: {WeaponLv}");
+            Debug.Log($"### Wrong weaponLv to buy: {WeaponLv}");
             return false;
         }
 
@@ -400,7 +389,7 @@ public class GameManager
         int cost = Managers.Data.GetTreasureCost(idx, level);
         if (cost < 0)
         {
-            Debug.Log($"Wrong Enhance idx or level: {idx}, {level}");
+            Debug.Log($"### Wrong Enhance idx or level: {idx}, {level}");
             return false;
         }
 
@@ -493,16 +482,19 @@ public class GameManager
         AdCount_Gold_2hr = 0;
         AdCount_Gem_100 = 0;
     }
+
+    // 시간당 골드 보상
+    public void GetGoldPerHour(int hour) { GetGold(_stageData.DropGold * 60 * hour); }
     #endregion
 
     #region 보스
     public BossData CurBossData { get; private set; }
-    public void EnterBossTry(int idx)
+    public void EnterBossTry()
     {
-        CurBossData = Managers.Data.GetBossData(idx);
+        CurBossData = Managers.Data.GetBossData(BossLv);
         if(CurBossData == null)
         {
-            Debug.Log($"Wrong boss idx: {idx}");
+            Debug.Log($"### Wrong boss level: {BossLv}");
             return;
         }
 

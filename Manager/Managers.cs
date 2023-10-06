@@ -8,7 +8,7 @@ public class Managers : MonoBehaviour
     private static DataManager dataManager = new DataManager();
     private static SoundManager soundManager = new SoundManager();
     private static WfsManager wfsManager = new WfsManager();
-    private static AdvManager advManager = new AdvManager();
+    private static AdManager advManager = new AdManager();
 
     public static GameManager Game {  get { return gameManager; } }
     public static UIManager UI { get {  return uiManager; } }
@@ -16,7 +16,7 @@ public class Managers : MonoBehaviour
     public static DataManager Data { get { return dataManager; } }
     public static SoundManager Sound { get { return soundManager; } }
     public static WfsManager Wfs { get { return wfsManager; } }
-    public static AdvManager Adv { get { return advManager; } }
+    public static AdManager Ad { get { return advManager; } }
 
     static bool _initialized;
     void Start()

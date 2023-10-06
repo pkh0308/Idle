@@ -22,9 +22,9 @@ public class UI_BossPopUp : UI_PopUp
     TextMeshProUGUI _timerText;
     TextMeshProUGUI _hpRateText;
     TextMeshProUGUI _cheerGuageText;
+    TextMeshProUGUI _cheerBtnText;
     TextMeshProUGUI[] _dmgTexts;
     Transform _dmgTextParent;
-    const string Cheering = "응원 게이지";
 
     enum Buttons
     {
@@ -65,6 +65,7 @@ public class UI_BossPopUp : UI_PopUp
         _timerText = GetText((int)Texts.TimerText);
         _hpRateText = GetText((int)Texts.HpRateText);
         _cheerGuageText = GetText((int)Texts.CheerGuageText);
+        _cheerBtnText = GetText((int)Texts.CheerBtnText);
 
         _dmgTextParent = transform.GetChild(0).Find(ConstValue.DmgTextParent);
         TextPooling();
@@ -259,6 +260,7 @@ public class UI_BossPopUp : UI_PopUp
         {
             _cheerComplete = true;
             _cheerGuageText.text = $"응원 버프 발동! (공격력 x{ConstValue.CheerBuffRate})";
+            _cheerBtnText.text = "응원중";
         }
     }
 
@@ -277,7 +279,8 @@ public class UI_BossPopUp : UI_PopUp
             if(cheerCount == 0 && _cheerComplete)
             {
                 _cheerComplete = false;
-                _cheerGuageText.text = Cheering;
+                _cheerGuageText.text = "응원 게이지";
+                _cheerBtnText.text = "응원하기";
             }
             yield return null;
         }

@@ -63,13 +63,13 @@ public class UI_ShopPopUp : UI_PopUp
 
     public void Btn_OnClickGetGold_2hr()
     {
-        if(Managers.Adv.CanShowAd((int)Buttons.GetGoldBtn_2hr, ConstValue.Ads.Gold_2hr) == false)
+        if(Managers.Ad.CanShowAd((int)Buttons.GetGoldBtn_2hr, ConstValue.Ads.Gold_2hr) == false)
         {
             Managers.UI.OpenNotice(ConstValue.Notice_AdCountOver);
             return;
         }
 
-        Managers.Adv.ShowRewardedAds((rwd) =>
+        Managers.Ad.ShowRewardedAds(() =>
         {
             Managers.Game.GetGoldPerHour(Gold_2Hour);
             Managers.UI.OpenNotice(ConstValue.Notice_AdReward);
@@ -78,17 +78,17 @@ public class UI_ShopPopUp : UI_PopUp
     }
     public void Btn_OnClickGetGold_5hr()
     {
-        Debug.Log("°ñµå È¹µæ(5½Ã°£)");
+        Debug.Log($"### °ñµå È¹µæ({Gold_5Hour}½Ã°£)");
     }
     public void Btn_OnClickGetGem_100()
     {
-        if (Managers.Adv.CanShowAd((int)Buttons.GetGemBtn_100, ConstValue.Ads.Gem_100) == false)
+        if (Managers.Ad.CanShowAd((int)Buttons.GetGemBtn_100, ConstValue.Ads.Gem_100) == false)
         {
             Managers.UI.OpenNotice(ConstValue.Notice_AdCountOver);
             return;
         }
 
-        Managers.Adv.ShowRewardedAds((rwd) =>
+        Managers.Ad.ShowRewardedAds(() =>
         {
             Managers.Game.GetGem(Gem_100);
             Managers.UI.OpenNotice(ConstValue.Notice_AdReward);
@@ -97,11 +97,11 @@ public class UI_ShopPopUp : UI_PopUp
     }
     public void Btn_OnClickGetGem_500()
     {
-        Debug.Log("Áª È¹µæ(500)");
+        Debug.Log($"### Áª È¹µæ({Gem_500})");
     }
     public void Btn_OnClickGetGem_2500()
     {
-        Debug.Log("Áª È¹µæ(2500)");
+        Debug.Log($"### Áª È¹µæ({Gem_2500})");
     }
     #endregion
 
