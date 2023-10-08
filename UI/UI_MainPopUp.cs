@@ -122,13 +122,6 @@ public class UI_MainPopUp : UI_PopUp
         _treasureBtn = GetImage((int)Images.TreasureBtn);
         _shopBtn = GetImage((int)Images.ShopBtn);
 
-        _mainPopUps = new GameObject[NumOfMenus];
-        Transform menus = transform.GetChild(0).Find(ConstValue.MenusParent);
-        Managers.Resc.InstantiateByIdx(nameof(UI_EnhancePopUp), (int)Menus.Enhance, menus, (obj, idx) => { _mainPopUps[idx] = obj; CountMenuLoad(); });
-        Managers.Resc.InstantiateByIdx(nameof(UI_WeaponPopUp), (int)Menus.Weapon, menus, (obj, idx) => { _mainPopUps[idx] = obj; CountMenuLoad(); });
-        Managers.Resc.InstantiateByIdx(nameof(UI_TreasurePopUp), (int)Menus.Treasure, menus, (obj, idx) => { _mainPopUps[idx] = obj; CountMenuLoad(); });
-        Managers.Resc.InstantiateByIdx(nameof(UI_ShopPopUp), (int)Menus.Shop, menus, (obj, idx) => { _mainPopUps[idx] = obj; CountMenuLoad(); });
-
         _front = GetImage((int)Images.Field01);
         _back = GetImage((int)Images.Field02);
         _hpBar = GetImage((int)Images.HpBar);
@@ -138,6 +131,8 @@ public class UI_MainPopUp : UI_PopUp
 
         _enemyField = GetImage((int)Images.EnemyField).rectTransform;
         _playerAnimator = GetImage((int)Images.Player).gameObject.GetComponent<Animator>();
+
+        LoadMenus();
 
         // 이전 접속기록이 있다면 오프라인 보상
         if (Managers.Game.LastAccessMinutes > 0) 
@@ -164,6 +159,34 @@ public class UI_MainPopUp : UI_PopUp
     void InitialSetActiveFalse()
     { 
         _hpBarBg.gameObject.SetActive(false);
+    }
+
+    // 메뉴(강화, 무기, 보물, 상점) 로드
+    // 순서에 맞게 들고있기 위해 리소스 매니저로 직접 로드
+    void LoadMenus()
+    {
+        _mainPopUps = new GameObject[NumOfMenus];
+        Transform menus = transform.GetChild(0).Find(ConstValue.MenusParent);
+        Managers.Resc.InstantiateByIdx(nameof(UI_EnhancePopUp), (int)Menus.Enhance, menus, (obj, idx) => { 
+            _mainPopUps[idx] = obj;
+            obj.AddComponent<UI_EnhancePopUp>();
+            CountMenuLoad(); 
+        });
+        Managers.Resc.InstantiateByIdx(nameof(UI_WeaponPopUp), (int)Menus.Weapon, menus, (obj, idx) => { 
+            _mainPopUps[idx] = obj;
+            obj.AddComponent<UI_WeaponPopUp>();
+            CountMenuLoad(); 
+        });
+        Managers.Resc.InstantiateByIdx(nameof(UI_TreasurePopUp), (int)Menus.Treasure, menus, (obj, idx) => {
+            _mainPopUps[idx] = obj;
+            obj.AddComponent<UI_TreasurePopUp>();
+            CountMenuLoad(); 
+        });
+        Managers.Resc.InstantiateByIdx(nameof(UI_ShopPopUp), (int)Menus.Shop, menus, (obj, idx) => { 
+            _mainPopUps[idx] = obj;
+            obj.AddComponent<UI_ShopPopUp>();
+            CountMenuLoad(); 
+        });
     }
 
     int _mCount = 0;
@@ -193,7 +216,7 @@ public class UI_MainPopUp : UI_PopUp
     #endregion
 
     #region Update
-    int _befGold;
+    long _befGold;
     int _befGem;
     void Update()
     {

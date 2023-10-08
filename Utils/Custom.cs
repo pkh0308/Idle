@@ -27,7 +27,7 @@ public class Custom
         return null;
     }
 
-    public static string CalUnit(int value)
+    public static string CalUnit(long value)
     {
         if (value < 0)
             return ConstValue.Max;
@@ -38,7 +38,7 @@ public class Custom
         // 1000 이상부터 단위 추가
         string[] units = { "", "A", "B", "C", "D", "E", "F" };
         int count = 0;
-        int remain = 0;
+        long remain = 0;
         while (value > 1000)
         {
             remain = value % 1000;

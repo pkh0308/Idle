@@ -36,12 +36,15 @@ public class UI_BossPopUp : UI_PopUp
         Player,
         HpBar,
         CheerGuageBar,
+        CheerGuageBarBg,
         Reward_GemIcon,
         Reward_GoldIcon
     }
     Image _boss;
     Image _bossHpBar;
     Image _cheerGuageBar;
+    int cheerCount;
+    int maxCheerCount;
 
     enum AnimVar
     {
@@ -73,6 +76,7 @@ public class UI_BossPopUp : UI_PopUp
         // 이미지 초기화
         _bossHpBar = GetImage((int)Images.HpBar);
         _cheerGuageBar = GetImage((int)Images.CheerGuageBar);
+        maxCheerCount = (int)_cheerGuageBar.rectTransform.sizeDelta.x;
 
         // 애니메이터 초기화
         _playerAnimator = GetImage((int)Images.Player).gameObject.GetComponent<Animator>();
@@ -219,15 +223,6 @@ public class UI_BossPopUp : UI_PopUp
         return hpRate;
     }
 
-    Vector2 cheerGuageScale = Vector2.one;
-    int cheerCount = 0;
-    int maxCheerCount = 1000;
-    void UpdateCheerGuage()
-    {
-        cheerGuageScale.x = (float)cheerCount / maxCheerCount;
-        _cheerGuageBar.rectTransform.localScale = cheerGuageScale;
-    }
-
     void ShowDmgText(int value, bool critical)
     {
         TextMeshProUGUI dmgText = null;
@@ -284,6 +279,13 @@ public class UI_BossPopUp : UI_PopUp
             }
             yield return null;
         }
+    }
+
+    Vector2 cheerGuageScale = Vector2.one;
+    void UpdateCheerGuage()
+    {
+        cheerGuageScale.x = (float)cheerCount / maxCheerCount;
+        _cheerGuageBar.rectTransform.localScale = cheerGuageScale;
     }
     #endregion
 

@@ -21,7 +21,7 @@ public class GameData
     public int Treasure_GoldUpLv;
     // 유저 데이터
     public string NickName;
-    public int CurGold;
+    public long CurGold;
     public int CurGem;
     public int StageIdx;
     // 마지막 접속

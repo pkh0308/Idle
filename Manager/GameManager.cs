@@ -44,7 +44,7 @@ public class GameManager
     public int Tr_GoldUpLv { get; private set; }
 
     public string NickName { get; private set; }
-    public int CurGold { get; private set; }
+    public long CurGold { get; private set; }
     public int CurGem { get; private set; }
     public int CurStageIdx { get; private set; }
 
@@ -191,7 +191,7 @@ public class GameManager
     #region ÀçÈ­ È¹µæ & ¼Ò¸ð
     bool Purchase(ConstValue.Goods type, int value)
     {
-        int temp = 0;
+        long temp = 0;
         if(type == ConstValue.Goods.Gold)
             temp = CurGold;
         else if(type == ConstValue.Goods.Gem)
@@ -204,12 +204,12 @@ public class GameManager
         if (type == ConstValue.Goods.Gold)
             CurGold = temp;
         else if (type == ConstValue.Goods.Gem)
-            CurGem = temp;
+            CurGem = (int)temp;
 
         return true;
     }
 
-    public int GetGold(int value) 
+    public long GetGold(int value) 
     { 
         CurGold += value;
         return CurGold; 
